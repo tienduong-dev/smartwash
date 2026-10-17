@@ -205,7 +205,9 @@
   <section th:if="${!#lists.isEmpty(lienQuan)}" class="mt-16">
     <h2 class="text-[17px] font-bold tracking-[-0.02em] mb-5">Sản phẩm cùng danh mục</h2>
     <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-x-5 gap-y-9">
-      <article th:each="x : ${lienQuan}" th:replace="~{fragments/san-pham :: the(${x})}"></article>
+      <th:block th:each="x : ${lienQuan}">
+        <article th:replace="~{fragments/san-pham :: the(${x})}"></article>
+      </th:block>
     </div>
   </section>
 </div>

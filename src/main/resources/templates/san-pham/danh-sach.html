@@ -142,7 +142,9 @@
       </div>
 
       <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-x-5 gap-y-9" th:unless="${ds.empty}">
-        <article th:each="p : ${ds.items}" th:replace="~{fragments/san-pham :: the(${p})}"></article>
+        <th:block th:each="p : ${ds.items}">
+          <article th:replace="~{fragments/san-pham :: the(${p})}"></article>
+        </th:block>
       </div>
 
       <nav th:replace="~{fragments/pagination :: paging(${ds})}"></nav>

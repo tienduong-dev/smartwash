@@ -100,18 +100,18 @@ GO
 -- ---------------------------------------------------------------------
 MERGE [dbo].[brands] AS t
 USING (VALUES
-    (N'LG',         N'LG',         N'lg',         N'Hàn Quốc',   N'brands/lg.svg'),
-    (N'Samsung',    N'SAMSUNG',    N'samsung',    N'Hàn Quốc',   N'brands/samsung.svg'),
-    (N'Electrolux', N'ELECTROLUX', N'electrolux', N'Thuỵ Điển',  N'brands/electrolux.svg'),
-    (N'Panasonic',  N'PANASONIC',  N'panasonic',  N'Nhật Bản',   N'brands/panasonic.svg'),
-    (N'Toshiba',    N'TOSHIBA',    N'toshiba',    N'Nhật Bản',   N'brands/toshiba.svg'),
-    (N'Hitachi',    N'HITACHI',    N'hitachi',    N'Nhật Bản',   N'brands/hitachi.svg'),
-    (N'Sharp',      N'SHARP',      N'sharp',      N'Nhật Bản',   N'brands/sharp.svg'),
-    (N'Aqua',       N'AQUA',       N'aqua',       N'Nhật Bản',   N'brands/aqua.svg'),
-    (N'Beko',       N'BEKO',       N'beko',       N'Thổ Nhĩ Kỳ', N'brands/beko.svg'),
-    (N'Casper',     N'CASPER',     N'casper',     N'Việt Nam',   N'brands/casper.svg'),
-    (N'Midea',      N'MIDEA',      N'midea',      N'Trung Quốc', N'brands/midea.svg'),
-    (N'Xiaomi',     N'XIAOMI',     N'xiaomi',     N'Trung Quốc', N'brands/xiaomi.svg')
+    (N'LG',         N'LG',         N'lg',         N'Hàn Quốc',   N'/img/brands/lg.svg'),
+    (N'Samsung',    N'SAMSUNG',    N'samsung',    N'Hàn Quốc',   N'/img/brands/samsung.svg'),
+    (N'Electrolux', N'ELECTROLUX', N'electrolux', N'Thuỵ Điển',  N'/img/brands/electrolux.svg'),
+    (N'Panasonic',  N'PANASONIC',  N'panasonic',  N'Nhật Bản',   N'/img/brands/panasonic.svg'),
+    (N'Toshiba',    N'TOSHIBA',    N'toshiba',    N'Nhật Bản',   N'/img/brands/toshiba.svg'),
+    (N'Hitachi',    N'HITACHI',    N'hitachi',    N'Nhật Bản',   N'/img/brands/hitachi.svg'),
+    (N'Sharp',      N'SHARP',      N'sharp',      N'Nhật Bản',   N'/img/brands/sharp.svg'),
+    (N'Aqua',       N'AQUA',       N'aqua',       N'Nhật Bản',   N'/img/brands/aqua.svg'),
+    (N'Beko',       N'BEKO',       N'beko',       N'Thổ Nhĩ Kỳ', N'/img/brands/beko.svg'),
+    (N'Casper',     N'CASPER',     N'casper',     N'Việt Nam',   N'/img/brands/casper.svg'),
+    (N'Midea',      N'MIDEA',      N'midea',      N'Trung Quốc', N'/img/brands/midea.svg'),
+    (N'Xiaomi',     N'XIAOMI',     N'xiaomi',     N'Trung Quốc', N'/img/brands/xiaomi.svg')
 ) AS s ([name], [normalized_name], [slug], [country], [logo])
 ON t.[slug] = s.[slug]
 WHEN NOT MATCHED THEN
@@ -158,13 +158,13 @@ SELECT b.[id], br.[id], v.[name], v.[slug], v.[store_type], v.[logo], v.[mo_ta],
        N'ACTIVE', v.[verified], SYSDATETIME(), (SELECT [id] FROM [dbo].[users] WHERE [email] = N'admin@smartwash.vn')
 FROM (VALUES
     (N'0312345678', N'lg',      N'LG Official Store',      N'lg-official-store',      N'OFFICIAL',
-     N'brands/lg.svg',      N'Gian hàng chính hãng LG tại Việt Nam, đầy đủ dòng máy giặt lồng ngang và lồng đứng.',
+     N'/img/brands/lg.svg',      N'Gian hàng chính hãng LG tại Việt Nam, đầy đủ dòng máy giặt lồng ngang và lồng đứng.',
      N'0901000002', N'lg@smartwash.vn',  N'145 Nguyễn Trãi, Thanh Xuân, Hà Nội', CAST(1 AS bit)),
     (N'0312345678', N'toshiba', N'Minh Khoa Electronics',  N'minh-khoa-electronics',  N'RETAILER',
-     N'stores/mac-dinh.svg', N'Cửa hàng bán lẻ máy giặt Toshiba chính hãng, nhập từ nhà phân phối uỷ quyền.',
+     N'/img/stores/mac-dinh.svg', N'Cửa hàng bán lẻ máy giặt Toshiba chính hãng, nhập từ nhà phân phối uỷ quyền.',
      N'0901000002', N'toshiba@smartwash.vn', N'145 Nguyễn Trãi, Thanh Xuân, Hà Nội', CAST(0 AS bit)),
     (N'0398765432', N'samsung', N'Samsung Home Appliance', N'samsung-home-appliance', N'DISTRIBUTOR',
-     N'brands/samsung.svg', N'Nhà phân phối uỷ quyền Samsung khu vực miền Bắc.',
+     N'/img/brands/samsung.svg', N'Nhà phân phối uỷ quyền Samsung khu vực miền Bắc.',
      N'0901000003', N'samsung@smartwash.vn', N'22 Lê Văn Lương, Cầu Giấy, Hà Nội', CAST(1 AS bit))
 ) AS v ([tax_code], [brand_slug], [name], [slug], [store_type], [logo], [mo_ta], [phone], [email], [pickup], [verified])
 JOIN [dbo].[businesses] b ON b.[tax_code] = v.[tax_code]

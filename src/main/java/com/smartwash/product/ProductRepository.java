@@ -34,7 +34,18 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @EntityGraph(attributePaths = {"store", "store.brand", "brand", "category", "inventory"})
     Optional<Product> findDetailById(Long id);
 
-    @EntityGraph(attributePaths = {"store", "store.brand", "brand", "category", "inventory", "images", "specs"})
+    /**
+     * Chi tiết sản phẩm cho trang khách.
+     *
+     * Chỉ nạp sẵn "images", KHÔNG nạp "specs". Hibernate không cho fetch cùng
+     * lúc hai collection kiểu List (bag) trong một truy vấn — sẽ ném
+     * MultipleBagFetchException — vì tích Descartes giữa hai bảng con làm số
+     * dòng nhân lên và Hibernate không khôi phục đúng được thứ tự @OrderBy.
+     *
+     * "specs" để lazy; cả hai collection đều có @BatchSize(20) nên khi template
+     * đọc tới thì Hibernate nạp bằng đúng một truy vấn phụ (open-in-view đang bật).
+     */
+    @EntityGraph(attributePaths = {"store", "store.brand", "brand", "category", "inventory", "images"})
     Optional<Product> findDetailBySlug(String slug);
 
     long countByStatus(String status);

@@ -89,7 +89,9 @@
     </div>
 
     <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-x-5 gap-y-9">
-      <article th:each="p : ${noiBat}" th:replace="~{fragments/san-pham :: the(${p})}"></article>
+      <th:block th:each="p : ${noiBat}">
+        <article th:replace="~{fragments/san-pham :: the(${p})}"></article>
+      </th:block>
     </div>
   </section>
 
