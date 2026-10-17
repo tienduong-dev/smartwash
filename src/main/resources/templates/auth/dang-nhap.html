@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/auth}">
+<head><title>Đăng nhập</title></head>
+<body>
+<div layout:fragment="content">
+
+  <h1 class="text-[26px] font-bold tracking-[-0.03em]">Đăng nhập</h1>
+  <p class="mt-2 text-sm text-muted">Chưa có tài khoản?
+    <a th:href="@{/register}" class="link-underline font-medium text-ink">Đăng ký miễn phí</a>
+  </p>
+
+  <form th:action="@{/login}" method="post" class="mt-8 space-y-4">
+    <div>
+      <label class="label" for="email">Email</label>
+      <input class="input" type="email" id="email" name="email" required autofocus
+             autocomplete="email" placeholder="ban@example.com"
+             th:value="${old != null ? old.get('email') : ''}">
+      <p th:replace="~{fragments/alerts :: fieldError('email')}"></p>
+    </div>
+
+    <div>
+      <div class="flex items-center justify-between">
+        <label class="label" for="password">Mật khẩu</label>
+        <a th:href="@{/forgot-password}" class="text-[13px] text-muted hover:text-ink transition">Quên mật khẩu?</a>
+      </div>
+      <input class="input" type="password" id="password" name="password" required
+             autocomplete="current-password" placeholder="••••••••">
+      <p th:replace="~{fragments/alerts :: fieldError('password')}"></p>
+    </div>
+
+    <button type="submit" class="btn btn-dark btn-block btn-lg">Đăng nhập</button>
+  </form>
+
+  <p class="mt-6 text-[13px] text-faint leading-relaxed">
+    Nhập sai mật khẩu 5 lần liên tiếp, tài khoản sẽ tạm khoá 15 phút để bảo vệ bạn.
+  </p>
+</div>
+</body>
+</html>

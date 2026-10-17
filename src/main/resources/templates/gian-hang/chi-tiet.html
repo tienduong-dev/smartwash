@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/app}">
+<head><title th:text="${store.name}">Gian hàng</title></head>
+<body>
+<div layout:fragment="content" class="mx-auto max-w-[1280px] px-6 lg:px-10 py-8">
+
+  <div th:if="${store.status == 'SUSPENDED'}" class="alert alert-info mb-6">
+    <svg th:replace="~{fragments/icons :: info('18')}"></svg>
+    <p>Gian hàng này đang tạm ngưng hoạt động nên hiện không nhận đơn mới.</p>
+  </div>
+
+  <!-- Đầu trang gian hàng -->
+  <div class="panel p-7 lg:p-9">
+    <div class="flex items-start gap-5 flex-wrap">
+      <img th:src="${store.logoUrl}" alt="" class="w-20 h-20 rounded-2xl object-cover bg-white shrink-0">
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-2 flex-wrap mb-1.5">
+          <span th:if="${store.official}" class="badge badge-dark">Chính hãng</span>
+          <span th:unless="${store.official}" class="badge badge-neutral" th:text="${store.storeTypeLabel}">…</span>
+          <span class="badge badge-neutral" th:text="${store.brandName}">…</span>
+        </div>
+        <h1 class="text-[24px] font-bold tracking-[-0.03em]" th:text="${store.name}">…</h1>
+        <p th:if="${store.description != null}" class="mt-2 text-sm text-muted leading-relaxed max-w-2xl"
+           th:text="${store.description}">…</p>
+      </div>
+
+      <dl class="flex gap-7">
+        <div>
+          <dt class="text-[12px] text-faint">Sản phẩm</dt>
+          <dd class="text-xl font-bold tnum" th:text="${ds.total}">0</dd>
+        </div>
+        <div th:if="${store.hasReviews()}">
+          <dt class="text-[12px] text-faint">Đánh giá</dt>
+          <dd class="text-xl font-bold tnum" th:text="${store.ratingAvg}">0</dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+
+  <!-- Sản phẩm -->
+  <section class="mt-10">
+    <h2 class="text-[17px] font-bold tracking-[-0.02em] mb-5">Sản phẩm của gian hàng</h2>
+
+    <div th:if="${ds.empty}" class="card">
+      <div th:replace="~{fragments/alerts :: empty('Gian hàng chưa có sản phẩm nào', 'Hãy quay lại sau nhé.')}"></div>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-x-5 gap-y-9" th:unless="${ds.empty}">
+      <article th:each="p : ${ds.items}" th:replace="~{fragments/san-pham :: the(${p})}"></article>
+    </div>
+
+    <nav th:replace="~{fragments/pagination :: paging(${ds})}"></nav>
+  </section>
+</div>
+</body>
+</html>

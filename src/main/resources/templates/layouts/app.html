@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title layout:title-pattern="$CONTENT_TITLE — SmartWash">SmartWash</title>
+  <meta name="csrf-token" th:content="${_csrf != null ? _csrf.token : ''}">
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+  <link rel="icon" th:href="@{/img/favicon.svg}" type="image/svg+xml">
+  <th:block layout:fragment="head"></th:block>
+</head>
+<body class="min-h-screen flex flex-col">
+
+<!-- ======================== THANH THÔNG BÁO ======================== -->
+<div class="bg-ink text-white text-xs">
+  <div class="mx-auto max-w-[1280px] px-6 lg:px-10 h-10 flex items-center justify-between">
+    <p class="font-medium">Sàn máy giặt chính hãng · Giao lắp tận nơi · Bảo hành theo tiêu chuẩn hãng</p>
+    <div class="hidden md:flex items-center gap-6 text-white/60">
+      <a th:href="@{/orders}" class="hover:text-white transition">Tra cứu đơn hàng</a>
+      <a th:href="@{/seller}" class="hover:text-white transition">Bán hàng cùng SmartWash</a>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== HEADER ============================== -->
+<header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-line">
+  <div class="mx-auto max-w-[1280px] px-6 lg:px-10 h-18 flex items-center gap-8">
+
+    <a th:href="@{/}" class="flex items-center gap-2.5 shrink-0">
+      <svg th:replace="~{fragments/icons :: logo('26')}"></svg>
+      <span class="text-[19px] font-extrabold tracking-[-0.035em]">SmartWash</span>
+    </a>
+
+    <nav class="hidden lg:flex items-center gap-7 text-sm font-medium">
+      <a th:href="@{/}" th:classappend="${currentPath == '/'} ? ' text-ink' : ' text-muted hover:text-ink transition'">Trang chủ</a>
+      <a th:href="@{/products}" th:classappend="${#strings.startsWith(currentPath, '/products')} ? ' text-ink' : ' text-muted hover:text-ink transition'">Sản phẩm</a>
+      <a th:href="@{/stores}" th:classappend="${#strings.startsWith(currentPath, '/stores')} ? ' text-ink' : ' text-muted hover:text-ink transition'">Gian hàng</a>
+      <a th:href="@{/support}" class="text-muted hover:text-ink transition">Hỗ trợ</a>
+    </nav>
+
+    <div class="flex-1"></div>
+
+    <form th:action="@{/products}" method="get"
+          class="hidden md:flex items-center gap-2 w-72 rounded-full border border-line px-4 h-10 focus-within:border-ink transition">
+      <svg th:replace="~{fragments/icons :: search('16')}" class="text-faint"></svg>
+      <input name="q" class="flex-1 text-sm outline-none bg-transparent" placeholder="Tìm máy giặt, gian hàng…"
+             aria-label="Tìm kiếm">
+    </form>
+
+    <div class="flex items-center gap-1">
+      <a th:href="@{/cart}" class="btn-icon relative" aria-label="Giỏ hàng">
+        <svg th:replace="~{fragments/icons :: bag('19')}"></svg>
+      </a>
+
+      <a th:if="${isLoggedIn}" th:href="@{/notifications}" class="btn-icon relative" aria-label="Thông báo">
+        <svg th:replace="~{fragments/icons :: bell('19')}"></svg>
+        <span th:if="${soThongBaoChuaDoc != null and soThongBaoChuaDoc > 0}"
+              class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-brand-500 text-white text-[10px] font-bold grid place-items-center tnum"
+              th:text="${soThongBaoChuaDoc > 99 ? '99+' : soThongBaoChuaDoc}">0</span>
+      </a>
+
+      <a th:if="${isLoggedIn}" th:href="@{/account}"
+         class="ml-1 flex items-center gap-2 pl-1 pr-3 h-10 rounded-full hover:bg-line-soft transition">
+        <span class="w-8 h-8 rounded-full bg-ink text-white text-xs font-bold grid place-items-center"
+              th:text="${authUser.initial}">D</span>
+        <span class="hidden xl:block text-sm font-medium" th:text="${authUser.fullName}">Tài khoản</span>
+      </a>
+
+      <a th:unless="${isLoggedIn}" th:href="@{/login}" class="ml-1 btn btn-dark btn-sm">Đăng nhập</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============================== NỘI DUNG ============================== -->
+<main class="flex-1">
+  <div class="mx-auto max-w-[1280px] px-6 lg:px-10 pt-6">
+    <div th:replace="~{fragments/alerts :: alerts}"></div>
+  </div>
+  <div layout:fragment="content"></div>
+</main>
+
+<!-- ============================== FOOTER ============================== -->
+<footer class="mt-24 border-t border-line bg-white">
+  <div class="mx-auto max-w-[1280px] px-6 lg:px-10 py-14 grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+    <div>
+      <a th:href="@{/}" class="flex items-center gap-2.5 mb-4">
+        <svg th:replace="~{fragments/icons :: logo('24')}"></svg>
+        <span class="text-[17px] font-extrabold tracking-[-0.035em]">SmartWash</span>
+      </a>
+      <p class="text-sm text-muted leading-relaxed max-w-xs">
+        Sàn thương mại điện tử chuyên máy giặt, kết nối khách hàng với các gian hàng
+        uỷ quyền của từng thương hiệu.
+      </p>
+    </div>
+
+    <div>
+      <p class="text-[13px] font-semibold mb-3.5">Mua sắm</p>
+      <ul class="space-y-2.5 text-sm text-muted">
+        <li><a th:href="@{/products}" class="hover:text-ink transition">Tất cả sản phẩm</a></li>
+        <li><a th:href="@{/stores}" class="hover:text-ink transition">Gian hàng</a></li>
+        <li><a th:href="@{/orders}" class="hover:text-ink transition">Đơn hàng của tôi</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <p class="text-[13px] font-semibold mb-3.5">Bán hàng</p>
+      <ul class="space-y-2.5 text-sm text-muted">
+        <li><a th:href="@{/seller/register}" class="hover:text-ink transition">Mở gian hàng</a></li>
+        <li><a th:href="@{/seller}" class="hover:text-ink transition">Kênh người bán</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <p class="text-[13px] font-semibold mb-3.5">Hỗ trợ</p>
+      <ul class="space-y-2.5 text-sm text-muted">
+        <li><a th:href="@{/support}" class="hover:text-ink transition">Trung tâm hỗ trợ</a></li>
+        <li><a th:href="@{/returns}" class="hover:text-ink transition">Đổi trả &amp; bảo hành</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="border-t border-line-soft">
+    <div class="mx-auto max-w-[1280px] px-6 lg:px-10 h-14 flex items-center justify-between text-[13px] text-faint">
+      <p>© 2026 SmartWash</p>
+      <p>Đồ án môn học</p>
+    </div>
+  </div>
+</footer>
+
+<th:block layout:fragment="scripts"></th:block>
+</body>
+</html>

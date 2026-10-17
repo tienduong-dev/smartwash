@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title layout:title-pattern="$CONTENT_TITLE — SmartWash Admin">SmartWash Admin</title>
+  <meta name="csrf-token" th:content="${_csrf != null ? _csrf.token : ''}">
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+  <link rel="icon" th:href="@{/img/favicon.svg}" type="image/svg+xml">
+  <style>
+    /* Vai trò màu cho biểu đồ — đổi ở đây là đổi toàn bộ khu quản trị */
+    .viz { --series-1:#fe5313; --series-2:#2a78d6; --series-3:#1baf7a;
+           --grid:#f1f0ef; --axis:#a1a1aa; }
+  </style>
+  <th:block layout:fragment="head"></th:block>
+</head>
+<body class="bg-canvas">
+
+<div class="flex min-h-screen">
+
+  <!-- ============================= SIDEBAR ============================= -->
+  <aside class="w-[264px] shrink-0 bg-white border-r border-line flex-col fixed inset-y-0 left-0 hidden lg:flex">
+    <div class="h-18 flex items-center gap-2.5 px-6 border-b border-line-soft">
+      <svg th:replace="~{fragments/icons :: logo('26')}"></svg>
+      <div class="leading-tight">
+        <p class="font-extrabold tracking-[-0.03em]">SmartWash</p>
+        <p class="text-[11px] text-faint">Trang quản trị</p>
+      </div>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto scroll-thin px-3 py-4">
+      <a th:href="@{/admin}" class="nav-link"
+         th:classappend="${currentPath == '/admin' or currentPath == '/admin/dashboard'} ? ' active' : ''">
+        <svg th:replace="~{fragments/icons :: grid('18')}"></svg> Tổng quan
+      </a>
+
+      <p class="nav-group-label">Sàn giao dịch</p>
+      <a th:href="@{/admin/registrations}" class="nav-link"
+         th:classappend="${#strings.startsWith(currentPath, '/admin/registrations')} ? ' active' : ''">
+        <svg th:replace="~{fragments/icons :: file('18')}"></svg> Hồ sơ mở gian hàng
+        <span th:if="${navHoSoChoDuyet != null and navHoSoChoDuyet > 0}"
+              class="ml-auto badge badge-warning tnum" th:text="${navHoSoChoDuyet}">0</span>
+      </a>
+      <a th:href="@{/admin/stores}" class="nav-link"
+         th:classappend="${#strings.startsWith(currentPath, '/admin/stores')} ? ' active' : ''">
+        <svg th:replace="~{fragments/icons :: store('18')}"></svg> Gian hàng
+      </a>
+      <a th:href="@{/admin/brands}" class="nav-link"
+         th:classappend="${#strings.startsWith(currentPath, '/admin/brands')} ? ' active' : ''">
+        <svg th:replace="~{fragments/icons :: tag('18')}"></svg> Thương hiệu
+      </a>
+      <a th:href="@{/admin/businesses}" class="nav-link"
+         th:classappend="${#strings.startsWith(currentPath, '/admin/businesses')} ? ' active' : ''">
+        <svg th:replace="~{fragments/icons :: building('18')}"></svg> Doanh nghiệp
+      </a>
+
+      <p class="nav-group-label">Bán hàng</p>
+      <a th:href="@{/admin/orders}" class="nav-link"
+         th:classappend="${#strings.startsWith(currentPath, '/admin/orders')} ? ' active' : ''">
+        <svg th:replace="~{fragments/icons :: bag('18')}"></svg> Đơn hàng
+      </a>
+      <a th:href="@{/admin/products}" class="nav-link"
+         th:classappend="${#strings.startsWith(currentPath, '/admin/products')} ? ' active' : ''">
+        <svg th:replace="~{fragments/icons :: box('18')}"></svg> Sản phẩm
+        <span th:if="${navSanPhamChoDuyet != null and navSanPhamChoDuyet > 0}"
+              class="ml-auto badge badge-warning tnum" th:text="${navSanPhamChoDuyet}">0</span>
+      </a>
+      <a th:href="@{/admin/categories}" class="nav-link"
+         th:classappend="${#strings.startsWith(currentPath, '/admin/categories')} ? ' active' : ''">
+        <svg th:replace="~{fragments/icons :: grid('18')}"></svg> Danh mục
+      </a>
+
+      <p class="nav-group-label">Hệ thống</p>
+      <a th:href="@{/admin/users}" class="nav-link"
+         th:classappend="${#strings.startsWith(currentPath, '/admin/users')} ? ' active' : ''">
+        <svg th:replace="~{fragments/icons :: users('18')}"></svg> Tài khoản
+      </a>
+      <a th:href="@{/admin/audit}" class="nav-link"
+         th:classappend="${#strings.startsWith(currentPath, '/admin/audit')} ? ' active' : ''">
+        <svg th:replace="~{fragments/icons :: history('18')}"></svg> Nhật ký thao tác
+      </a>
+      <a th:href="@{/admin/settings}" class="nav-link"
+         th:classappend="${#strings.startsWith(currentPath, '/admin/settings')} ? ' active' : ''">
+        <svg th:replace="~{fragments/icons :: gear('18')}"></svg> Cấu hình
+      </a>
+    </nav>
+
+    <div class="p-3 border-t border-line-soft">
+      <div class="flex items-center gap-3 p-2.5 rounded-xl">
+        <span class="w-9 h-9 rounded-full bg-ink text-white text-xs font-bold grid place-items-center"
+              th:text="${authUser != null ? authUser.initial : '?'}">A</span>
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-semibold truncate" th:text="${authUser != null ? authUser.fullName : ''}">Admin</p>
+          <p class="text-[11px] text-faint truncate" th:text="${authUser != null ? authUser.email : ''}">…</p>
+        </div>
+        <form th:action="@{/logout}" method="post">
+          <button type="submit" class="btn-icon" title="Đăng xuất" aria-label="Đăng xuất">
+            <svg th:replace="~{fragments/icons :: logout('17')}"></svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============================== NỘI DUNG ============================== -->
+  <div class="flex-1 lg:ml-[264px] min-w-0">
+
+    <header class="h-18 bg-white border-b border-line sticky top-0 z-30 flex items-center gap-4 px-6 lg:px-8">
+      <div class="min-w-0">
+        <h1 class="text-[17px] font-bold tracking-[-0.02em] truncate"
+            layout:fragment="pageTitle">Tổng quan</h1>
+        <p class="text-[13px] text-muted truncate" layout:fragment="pageSubtitle"></p>
+      </div>
+      <div class="flex-1"></div>
+      <div layout:fragment="pageActions" class="flex items-center gap-2"></div>
+      <a th:href="@{/}" class="btn btn-ghost btn-sm hidden md:inline-flex">Xem trang bán hàng</a>
+    </header>
+
+    <div class="p-6 lg:p-8">
+      <div th:replace="~{fragments/alerts :: alerts}" class="mb-6"></div>
+      <div layout:fragment="content"></div>
+    </div>
+  </div>
+</div>
+
+<th:block layout:fragment="scripts"></th:block>
+</body>
+</html>

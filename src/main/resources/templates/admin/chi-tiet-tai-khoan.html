@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin}">
+<head><title th:text="${u.fullName}">Tài khoản</title></head>
+<body>
+<h1 layout:fragment="pageTitle" th:text="${u.fullName}">…</h1>
+<p layout:fragment="pageSubtitle" th:text="${u.email}">…</p>
+<div layout:fragment="pageActions">
+  <span class="badge" th:classappend="' ' + ${u.statusBadge}" th:text="${u.statusLabel}">…</span>
+</div>
+
+<div layout:fragment="content">
+  <a th:href="@{/admin/users}" class="text-sm text-muted hover:text-ink transition">← Danh sách tài khoản</a>
+
+  <div class="grid lg:grid-cols-[1fr_340px] gap-6 mt-6 items-start">
+
+    <div class="space-y-6">
+      <div class="card p-6">
+        <p class="font-semibold mb-4">Thông tin</p>
+        <dl class="grid sm:grid-cols-2 gap-x-6 gap-y-3.5 text-sm">
+          <div><dt class="text-muted mb-0.5">Họ tên</dt><dd class="font-medium" th:text="${u.fullName}">…</dd></div>
+          <div><dt class="text-muted mb-0.5">Email</dt><dd th:text="${u.email}">…</dd></div>
+          <div><dt class="text-muted mb-0.5">Số điện thoại</dt><dd class="tnum" th:text="${u.phone ?: '—'}">…</dd></div>
+          <div><dt class="text-muted mb-0.5">Ngày tạo</dt>
+            <dd class="tnum" th:text="${#temporals.format(u.createdAt, 'dd/MM/yyyy')}">…</dd></div>
+          <div><dt class="text-muted mb-0.5">Đăng nhập gần nhất</dt>
+            <dd class="tnum" th:text="${u.lastLoginAt != null} ? ${#temporals.format(u.lastLoginAt, 'HH:mm dd/MM/yyyy')} : 'Chưa từng'">…</dd></div>
+          <div><dt class="text-muted mb-0.5">Lần đăng nhập sai</dt>
+            <dd class="tnum" th:text="${u.failedLoginCount}">0</dd></div>
+        </dl>
+
+        <div th:if="${u.temporarilyLocked}" class="alert alert-error mt-4">
+          <svg th:replace="~{fragments/icons :: x('18')}"></svg>
+          <p>Đang tạm khoá tới
+            <span class="tnum" th:text="${#temporals.format(u.lockedUntil, 'HH:mm dd/MM/yyyy')}">…</span>
+            do nhập sai mật khẩu nhiều lần.</p>
+        </div>
+      </div>
+
+      <div class="card p-6">
+        <p class="font-semibold mb-1">Vai trò</p>
+        <p class="text-[13px] text-muted mb-4">Một tài khoản có thể giữ nhiều vai trò cùng lúc.</p>
+
+        <ul class="space-y-2">
+          <li th:each="r : ${vaiTro}"
+              class="flex items-center justify-between gap-3 py-2.5 px-3 rounded-xl"
+              th:classappend="${u.hasRole(r.code)} ? ' bg-surface' : ''">
+            <div>
+              <p class="text-sm font-medium" th:text="${r.label}">…</p>
+              <code class="text-[11px] text-faint" th:text="${r.code}">…</code>
+            </div>
+
+            <form th:action="@{'/admin/users/' + ${u.id} + '/roles'}" method="post">
+              <input type="hidden" name="code" th:value="${r.code}">
+              <input type="hidden" name="action" th:value="${u.hasRole(r.code)} ? 'remove' : 'add'">
+              <button type="submit" class="btn btn-sm"
+                      th:classappend="${u.hasRole(r.code)} ? ' btn-ghost text-red-600' : ' btn-outline'"
+                      th:text="${u.hasRole(r.code)} ? 'Bỏ vai trò' : 'Cấp vai trò'">…</button>
+            </form>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="space-y-4 lg:sticky lg:top-24">
+      <div th:if="${u.status != 'LOCKED'}" class="card p-5">
+        <p class="font-semibold mb-1">Khoá tài khoản</p>
+        <p class="text-[13px] text-muted mb-3">Người dùng sẽ bị đăng xuất và không đăng nhập lại được.</p>
+        <form th:action="@{'/admin/users/' + ${u.id} + '/lock'}" method="post" class="space-y-3"
+              onsubmit="return confirm('Khoá tài khoản này?');">
+          <textarea class="input" name="reason" rows="2" placeholder="Lý do khoá"></textarea>
+          <button type="submit" class="btn btn-danger btn-block">Khoá tài khoản</button>
+        </form>
+      </div>
+
+      <form th:if="${u.status == 'LOCKED' or u.temporarilyLocked}"
+            th:action="@{'/admin/users/' + ${u.id} + '/unlock'}" method="post">
+        <button type="submit" class="btn btn-brand btn-block">Mở khoá tài khoản</button>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>

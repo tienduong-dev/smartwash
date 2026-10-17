@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/app}">
+<head><title>Thông báo</title></head>
+<body>
+<div layout:fragment="content" class="mx-auto max-w-[1280px] px-6 lg:px-10 py-8">
+
+  <div class="max-w-2xl">
+    <div class="flex items-center justify-between gap-4">
+      <div>
+        <h1 class="text-[22px] font-bold tracking-[-0.025em]">Thông báo</h1>
+        <p class="mt-1 text-sm text-muted">Cập nhật về đơn hàng, gian hàng và hồ sơ của bạn.</p>
+      </div>
+      <form th:action="@{/notifications/read-all}" method="post">
+        <button type="submit" class="btn btn-ghost btn-sm">Đánh dấu đã đọc hết</button>
+      </form>
+    </div>
+
+    <div class="card mt-6 divide-y divide-line-soft">
+      <div th:if="${ds.empty}">
+        <div th:replace="~{fragments/alerts :: empty('Chưa có thông báo', 'Khi có cập nhật mới, chúng sẽ xuất hiện ở đây.')}"></div>
+      </div>
+
+      <article th:each="n : ${ds.items}" class="p-5 flex gap-4"
+               th:classappend="${n.unread} ? ' bg-surface/60' : ''">
+        <span class="w-9 h-9 rounded-full grid place-items-center shrink-0"
+              th:classappend="${n.unread} ? ' bg-brand-500 text-white' : ' bg-line-soft text-muted'">
+          <svg th:replace="~{fragments/icons :: bell('17')}"></svg>
+        </span>
+
+        <div class="min-w-0 flex-1">
+          <p class="font-semibold leading-snug" th:text="${n.title}">…</p>
+          <p th:if="${n.content != null}" class="mt-1 text-sm text-muted leading-relaxed" th:text="${n.content}">…</p>
+          <p class="mt-2 text-[12px] text-faint tnum"
+             th:text="${#temporals.format(n.createdAt, 'HH:mm dd/MM/yyyy')}">…</p>
+        </div>
+
+        <form th:if="${n.link != null}" th:action="@{'/notifications/' + ${n.id} + '/read'}" method="post"
+              class="shrink-0">
+          <input type="hidden" name="next" th:value="${n.link}">
+          <button type="submit" class="btn btn-outline btn-sm">Xem</button>
+        </form>
+        <form th:unless="${n.link != null}" th:if="${n.unread}"
+              th:action="@{'/notifications/' + ${n.id} + '/read'}" method="post" class="shrink-0">
+          <button type="submit" class="btn btn-ghost btn-sm">Đã đọc</button>
+        </form>
+      </article>
+    </div>
+
+    <nav th:replace="~{fragments/pagination :: paging(${ds})}"></nav>
+  </div>
+</div>
+</body>
+</html>

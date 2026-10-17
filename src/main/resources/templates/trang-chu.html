@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/app}">
+<head><title>Sàn máy giặt chính hãng</title></head>
+<body>
+<div layout:fragment="content">
+
+  <!-- ================================ HERO ================================ -->
+  <section class="mx-auto max-w-[1280px] px-6 lg:px-10 pt-14 pb-20">
+    <div class="grid lg:grid-cols-[1.05fr_1fr] gap-12 lg:gap-16 items-center">
+
+      <div>
+        <p class="eyebrow mb-5">Sàn máy giặt chính hãng</p>
+        <h1 class="display-1">Giặt sạch,<br>sống nhẹ nhàng.</h1>
+        <p class="mt-6 text-[17px] leading-relaxed text-muted max-w-md">
+          Máy giặt từ các gian hàng uỷ quyền của từng thương hiệu. Giá niêm yết,
+          giao lắp tận nơi, bảo hành theo tiêu chuẩn hãng.
+        </p>
+
+        <div class="mt-9 flex flex-wrap items-center gap-3">
+          <a th:href="@{/products}" class="btn btn-dark btn-lg">
+            Xem sản phẩm
+            <svg th:replace="~{fragments/icons :: arrow('17')}"></svg>
+          </a>
+          <a th:href="@{/stores}" class="btn btn-outline btn-lg">
+            Xem <span class="tnum" th:text="${#lists.size(gianHang)}">0</span> gian hàng
+          </a>
+        </div>
+
+        <dl class="mt-12 grid grid-cols-3 gap-6 max-w-md">
+          <div>
+            <dt class="text-2xl font-bold tnum tracking-tight" th:text="${#lists.size(thuongHieu)}">0</dt>
+            <dd class="text-[13px] text-muted mt-0.5">thương hiệu</dd>
+          </div>
+          <div class="border-l border-line pl-6">
+            <dt class="text-2xl font-bold tnum tracking-tight" th:text="${#lists.size(gianHang)}">0</dt>
+            <dd class="text-[13px] text-muted mt-0.5">gian hàng uỷ quyền</dd>
+          </div>
+          <div class="border-l border-line pl-6">
+            <dt class="text-2xl font-bold tnum tracking-tight">10<span class="text-base font-semibold text-faint">năm</span></dt>
+            <dd class="text-[13px] text-muted mt-0.5">bảo hành tối đa</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="tile aspect-[4/5] lg:aspect-square overflow-hidden">
+        <img th:src="@{/img/products/cua-ngang-lg.svg}" alt="Máy giặt cửa ngang"
+             class="w-full h-full object-contain p-12">
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================= DANH MỤC ============================= -->
+  <section class="mx-auto max-w-[1280px] px-6 lg:px-10 pb-20" th:if="${!#lists.isEmpty(danhMuc)}">
+    <div class="flex items-end justify-between gap-4 mb-7">
+      <div>
+        <p class="eyebrow mb-2">Danh mục</p>
+        <h2 class="display-2">Chọn theo nhu cầu</h2>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <a th:each="c : ${danhMuc}" th:href="@{/products(categoryId=${c.id})}"
+         class="tile p-6 hover:shadow-[0_12px_40px_-16px_rgb(0_0_0/0.15)] transition">
+        <img th:if="${c.imageUrl != null}" th:src="${c.imageUrl}" alt=""
+             class="w-12 h-12 object-contain mb-3">
+        <span th:unless="${c.imageUrl != null}"
+              class="w-12 h-12 rounded-xl bg-white grid place-items-center text-muted mb-3">
+          <svg th:replace="~{fragments/icons :: box('22')}"></svg>
+        </span>
+        <p class="font-semibold" th:text="${c.name}">…</p>
+        <p th:if="${c.description != null}" class="mt-1 text-[13px] text-muted truncate-2"
+           th:text="${c.description}">…</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- =========================== SẢN PHẨM NỔI BẬT =========================== -->
+  <section class="mx-auto max-w-[1280px] px-6 lg:px-10 pb-20" th:if="${!#lists.isEmpty(noiBat)}">
+    <div class="flex items-end justify-between gap-4 mb-7">
+      <div>
+        <p class="eyebrow mb-2">Bán chạy</p>
+        <h2 class="display-2">Khách chọn nhiều nhất</h2>
+      </div>
+      <a th:href="@{/products}" class="btn btn-ghost hidden sm:inline-flex">
+        Tất cả sản phẩm
+        <svg th:replace="~{fragments/icons :: arrow('16')}"></svg>
+      </a>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-x-5 gap-y-9">
+      <article th:each="p : ${noiBat}" th:replace="~{fragments/san-pham :: the(${p})}"></article>
+    </div>
+  </section>
+
+  <!-- ============================ THƯƠNG HIỆU ============================ -->
+  <section class="mx-auto max-w-[1280px] px-6 lg:px-10 pb-20" th:if="${!#lists.isEmpty(thuongHieu)}">
+    <div class="flex items-end justify-between gap-4 mb-7">
+      <div>
+        <p class="eyebrow mb-2">Thương hiệu</p>
+        <h2 class="display-2">Các hãng trên sàn</h2>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div th:each="b : ${thuongHieu}" class="tile p-5 grid place-items-center aspect-[4/3]">
+        <img th:src="${b.logoUrl}" th:alt="${b.name}" class="max-h-10 max-w-full object-contain mb-2">
+        <p class="text-[13px] font-medium text-center" th:text="${b.name}">…</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================= GIAN HÀNG ============================= -->
+  <section class="mx-auto max-w-[1280px] px-6 lg:px-10 pb-20">
+    <div class="flex items-end justify-between gap-4 mb-7">
+      <div>
+        <p class="eyebrow mb-2">Gian hàng</p>
+        <h2 class="display-2">Mua từ nơi uỷ quyền</h2>
+      </div>
+      <a th:href="@{/stores}" class="btn btn-ghost hidden sm:inline-flex">
+        Tất cả gian hàng
+        <svg th:replace="~{fragments/icons :: arrow('16')}"></svg>
+      </a>
+    </div>
+
+    <div th:if="${#lists.isEmpty(gianHang)}" class="card">
+      <div th:replace="~{fragments/alerts :: empty('Chưa có gian hàng nào', 'Các gian hàng đầu tiên sẽ xuất hiện sau khi được duyệt.')}"></div>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4" th:unless="${#lists.isEmpty(gianHang)}">
+      <a th:each="s : ${gianHang}" th:href="@{'/stores/' + ${s.slug}}"
+         class="card p-5 hover:shadow-[0_12px_40px_-16px_rgb(0_0_0/0.15)] transition">
+        <div class="flex items-start gap-3">
+          <img th:src="${s.logoUrl}" alt="" class="w-11 h-11 rounded-xl object-cover bg-line-soft shrink-0">
+          <div class="min-w-0 flex-1">
+            <p class="font-semibold leading-snug truncate" th:text="${s.name}">…</p>
+            <p class="text-[13px] text-muted truncate" th:text="${s.brandName}">…</p>
+          </div>
+        </div>
+        <div class="mt-4 flex items-center gap-2 flex-wrap">
+          <span th:if="${s.official}" class="badge badge-dark">Chính hãng</span>
+          <span th:unless="${s.official}" class="badge badge-neutral" th:text="${s.storeTypeLabel}">…</span>
+          <span th:if="${s.hasReviews()}" class="text-[13px] text-muted tnum"
+                th:text="${s.ratingAvg} + '/5 · ' + ${s.reviewCount} + ' đánh giá'">…</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============================ MỜI BÁN HÀNG ============================ -->
+  <section class="mx-auto max-w-[1280px] px-6 lg:px-10 pb-4">
+    <div class="panel p-10 lg:p-14 grid lg:grid-cols-[1.2fr_1fr] gap-10 items-center">
+      <div>
+        <p class="eyebrow mb-4">Dành cho người bán</p>
+        <h2 class="display-2">Mở gian hàng<br>trên SmartWash.</h2>
+        <p class="mt-5 text-[15px] leading-relaxed text-muted max-w-md">
+          Nộp hồ sơ kèm giấy tờ uỷ quyền, được duyệt là bán được ngay.
+          Mỗi gian hàng bán đúng một thương hiệu nên khách luôn biết họ đang mua của ai.
+        </p>
+        <a th:href="@{/seller/register}" class="mt-8 btn btn-dark btn-lg">
+          Nộp hồ sơ
+          <svg th:replace="~{fragments/icons :: arrow('17')}"></svg>
+        </a>
+      </div>
+      <ul class="space-y-4 text-sm">
+        <li class="flex gap-3">
+          <span class="text-brand-500 shrink-0 mt-0.5"><svg th:replace="~{fragments/icons :: check('18')}"></svg></span>
+          <span>Phí sàn tính trên đơn giao thành công, không thu trước.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="text-brand-500 shrink-0 mt-0.5"><svg th:replace="~{fragments/icons :: check('18')}"></svg></span>
+          <span>Phân quyền nhiều nhân viên cùng vận hành một gian hàng.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="text-brand-500 shrink-0 mt-0.5"><svg th:replace="~{fragments/icons :: check('18')}"></svg></span>
+          <span>Nhãn gian hàng chính hãng cho đơn vị được hãng uỷ quyền.</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+</div>
+</body>
+</html>

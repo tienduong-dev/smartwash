@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/app}">
+<head><title>Gian hàng</title></head>
+<body>
+<div layout:fragment="content" class="mx-auto max-w-[1280px] px-6 lg:px-10 py-10">
+
+  <p class="eyebrow mb-3">Gian hàng</p>
+  <h1 class="display-2">Mua từ nơi uỷ quyền</h1>
+  <p class="mt-4 text-[15px] text-muted max-w-xl leading-relaxed">
+    Mỗi gian hàng gắn đúng một thương hiệu và được quản trị viên thẩm định giấy tờ trước khi mở.
+  </p>
+
+  <div th:if="${#lists.isEmpty(gianHang)}" class="card mt-10">
+    <div th:replace="~{fragments/alerts :: empty('Chưa có gian hàng nào', 'Các gian hàng đầu tiên sẽ xuất hiện sau khi được duyệt.')}"></div>
+  </div>
+
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-10" th:unless="${#lists.isEmpty(gianHang)}">
+    <a th:each="s : ${gianHang}" th:href="@{'/stores/' + ${s.slug}}"
+       class="card p-6 hover:shadow-[0_12px_40px_-16px_rgb(0_0_0/0.15)] transition">
+      <div class="flex items-start gap-3.5">
+        <img th:src="${s.logoUrl}" alt="" class="w-12 h-12 rounded-xl object-cover bg-line-soft shrink-0">
+        <div class="min-w-0 flex-1">
+          <p class="font-semibold leading-snug" th:text="${s.name}">…</p>
+          <p class="text-[13px] text-muted" th:text="${s.brandName}">…</p>
+        </div>
+      </div>
+      <p th:if="${s.description != null}" class="mt-4 text-sm text-muted truncate-2" th:text="${s.description}">…</p>
+      <div class="mt-4 flex items-center gap-2 flex-wrap">
+        <span th:if="${s.official}" class="badge badge-dark">Chính hãng</span>
+        <span th:unless="${s.official}" class="badge badge-neutral" th:text="${s.storeTypeLabel}">…</span>
+        <span th:if="${s.status == 'SUSPENDED'}" class="badge badge-warning">Tạm ngưng</span>
+        <span th:if="${s.hasReviews()}" class="text-[13px] text-muted tnum ml-auto"
+              th:text="${s.ratingAvg} + '/5'">…</span>
+      </div>
+    </a>
+  </div>
+</div>
+</body>
+</html>

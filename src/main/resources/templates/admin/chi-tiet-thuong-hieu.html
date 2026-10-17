@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin}">
+<head><title th:text="${b.name}">Thương hiệu</title></head>
+<body>
+<h1 layout:fragment="pageTitle" th:text="${b.name}">…</h1>
+<p layout:fragment="pageSubtitle" th:text="'Khoá chuẩn hoá: ' + ${b.normalizedName}">…</p>
+<div layout:fragment="pageActions">
+  <span class="badge" th:classappend="' ' + ${b.statusBadge}" th:text="${b.statusLabel}">…</span>
+</div>
+
+<div layout:fragment="content">
+  <a th:href="@{/admin/brands}" class="text-sm text-muted hover:text-ink transition">← Danh sách thương hiệu</a>
+
+  <div th:if="${!#lists.isEmpty(nghiTrung)}" class="alert alert-info mt-5">
+    <svg th:replace="~{fragments/icons :: info('18')}"></svg>
+    <div>
+      <p class="font-semibold mb-1">Có thương hiệu khác cùng khoá chuẩn hoá</p>
+      <ul class="space-y-1">
+        <li th:each="k : ${nghiTrung}">
+          <a th:href="@{'/admin/brands/' + ${k.id}}" class="link-underline font-medium" th:text="${k.name}">…</a>
+          <span class="text-[13px]" th:text="' — ' + ${k.statusLabel}">…</span>
+        </li>
+      </ul>
+      <p class="mt-2 text-[13px]">
+        Hệ thống không tự gộp. Nếu đúng là trùng, hãy khoá bản thừa sau khi chuyển gian hàng sang bản chính.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-[1fr_320px] gap-6 mt-6 items-start">
+
+    <div class="space-y-6">
+      <div class="card p-6">
+        <p class="font-semibold mb-4">Thông tin</p>
+        <form th:action="@{'/admin/brands/' + ${b.id}}" method="post" enctype="multipart/form-data" class="space-y-4">
+          <div class="flex items-center gap-4">
+            <img th:src="${b.logoUrl}" alt="" class="w-16 h-16 rounded-xl object-contain bg-line-soft p-2">
+            <div class="flex-1">
+              <label class="label" for="logo">Logo</label>
+              <input class="input" type="file" id="logo" name="logo" accept="image/*">
+            </div>
+          </div>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="label" for="name">Tên thương hiệu</label>
+              <input class="input" id="name" name="name" required th:value="${b.name}">
+              <p class="form-hint">Đổi tên sẽ tính lại khoá chuẩn hoá.</p>
+            </div>
+            <div>
+              <label class="label" for="country">Quốc gia</label>
+              <input class="input" id="country" name="country" th:value="${b.country}">
+            </div>
+          </div>
+          <div>
+            <label class="label" for="website">Website</label>
+            <input class="input" id="website" name="website" th:value="${b.website}">
+          </div>
+          <div>
+            <label class="label" for="description">Mô tả</label>
+            <textarea class="input" id="description" name="description" rows="4" th:text="${b.description}"></textarea>
+          </div>
+          <button type="submit" class="btn btn-dark">Lưu</button>
+        </form>
+      </div>
+
+      <div class="card p-6">
+        <p class="font-semibold mb-4">Gian hàng gắn thương hiệu này
+          <span class="text-muted font-normal tnum" th:text="'(' + ${#lists.size(gianHang)} + ')'">…</span>
+        </p>
+        <div th:if="${#lists.isEmpty(gianHang)}" class="text-sm text-muted py-4">
+          Chưa có gian hàng nào bán thương hiệu này.
+        </div>
+        <ul class="divide-y divide-line-soft" th:unless="${#lists.isEmpty(gianHang)}">
+          <li th:each="s : ${gianHang}" class="py-3 flex items-center gap-3">
+            <img th:src="${s.logoUrl}" alt="" class="w-9 h-9 rounded-lg object-cover bg-line-soft shrink-0">
+            <div class="min-w-0 flex-1">
+              <a th:href="@{'/admin/stores/' + ${s.id}}" class="font-medium link-underline truncate block"
+                 th:text="${s.name}">…</a>
+              <p class="text-[12px] text-faint" th:text="${s.storeTypeLabel}">…</p>
+            </div>
+            <span class="badge shrink-0" th:classappend="' ' + ${s.statusBadge}" th:text="${s.statusLabel}">…</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="space-y-4 lg:sticky lg:top-24">
+      <form th:if="${b.status == 'PENDING_VERIFICATION'}" th:action="@{'/admin/brands/' + ${b.id} + '/verify'}" method="post">
+        <button type="submit" class="btn btn-brand btn-block">Xác minh thương hiệu</button>
+      </form>
+
+      <div th:if="${!b.locked}" class="card p-5">
+        <p class="font-semibold mb-1">Khoá thương hiệu</p>
+        <p class="text-[13px] text-muted mb-3">
+          Các gian hàng gắn thương hiệu này sẽ không bán được. Đơn hàng đang chạy vẫn hoàn tất bình thường.
+        </p>
+        <form th:action="@{'/admin/brands/' + ${b.id} + '/lock'}" method="post" class="space-y-3"
+              onsubmit="return confirm('Khoá thương hiệu này?');">
+          <input class="input" name="reason" placeholder="Lý do khoá">
+          <button type="submit" class="btn btn-danger btn-block">Khoá</button>
+        </form>
+      </div>
+
+      <form th:if="${b.locked}" th:action="@{'/admin/brands/' + ${b.id} + '/unlock'}" method="post">
+        <button type="submit" class="btn btn-outline btn-block">Mở khoá thương hiệu</button>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>

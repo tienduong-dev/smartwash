@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin}">
+<head><title>Cấu hình</title></head>
+<body>
+<h1 layout:fragment="pageTitle">Cấu hình sàn</h1>
+<p layout:fragment="pageSubtitle">Các giá trị áp dụng cho toàn bộ gian hàng</p>
+
+<div layout:fragment="content">
+  <div class="max-w-2xl space-y-6">
+
+    <form th:action="@{/admin/settings}" method="post" class="card p-6 space-y-5">
+      <div>
+        <label class="label" for="commissionRate">Tỷ lệ phí sàn mặc định (%)</label>
+        <input class="input tnum" id="commissionRate" name="commissionRate" required
+               inputmode="decimal" th:value="${tyLeHoaHong}">
+        <p class="form-hint">
+          Áp dụng cho gian hàng chưa có mức riêng. Phí chỉ được ghi nhận khi đơn giao thành công.
+        </p>
+      </div>
+
+      <div>
+        <label class="label" for="returnWindowDays">Số ngày được đổi trả</label>
+        <input class="input tnum" id="returnWindowDays" name="returnWindowDays" required
+               inputmode="numeric" th:value="${soNgayDoiTra}">
+        <p class="form-hint">Tính từ lúc đơn hàng chuyển sang trạng thái giao thành công.</p>
+      </div>
+
+      <label class="flex items-start gap-3 cursor-pointer">
+        <input type="checkbox" name="productReviewRequired" value="true" class="w-4 h-4 accent-black mt-0.5"
+               th:checked="${batBuocDuyetSanPham}">
+        <span>
+          <span class="text-sm font-medium block">Bắt buộc duyệt sản phẩm mới</span>
+          <span class="text-[13px] text-muted">
+            Sản phẩm người bán đăng phải được quản trị viên duyệt trước khi hiện cho khách.
+          </span>
+        </span>
+      </label>
+
+      <div class="pt-2">
+        <button type="submit" class="btn btn-dark">Lưu cấu hình</button>
+      </div>
+    </form>
+
+    <div class="card p-6">
+      <p class="font-semibold mb-4">Toàn bộ khoá cấu hình</p>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead><tr><th>Khoá</th><th>Giá trị</th><th>Mô tả</th><th>Cập nhật</th></tr></thead>
+          <tbody>
+            <tr th:each="s : ${cauHinh}">
+              <td><code class="text-[12px]" th:text="${s.key}">…</code></td>
+              <td class="tnum font-medium" th:text="${s.value}">…</td>
+              <td class="text-muted text-sm" th:text="${s.description ?: '—'}">…</td>
+              <td class="tnum text-[12px] text-faint"
+                  th:text="${s.updatedAt != null} ? ${#temporals.format(s.updatedAt, 'dd/MM/yy')} : '—'">…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

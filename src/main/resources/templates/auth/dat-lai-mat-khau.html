@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/auth}">
+<head><title>Đặt lại mật khẩu</title></head>
+<body>
+<div layout:fragment="content">
+
+  <h1 class="text-[26px] font-bold tracking-[-0.03em]">Đặt mật khẩu mới</h1>
+  <p class="mt-2 text-sm text-muted">Mật khẩu cần ít nhất 8 ký tự.</p>
+
+  <p th:replace="~{fragments/alerts :: fieldError('token')}"></p>
+
+  <form th:action="@{/reset-password}" method="post" class="mt-8 space-y-4">
+    <input type="hidden" name="token" th:value="${token}">
+
+    <div>
+      <label class="label" for="password">Mật khẩu mới</label>
+      <input class="input" type="password" id="password" name="password" required autofocus
+             autocomplete="new-password">
+      <p th:replace="~{fragments/alerts :: fieldError('password')}"></p>
+    </div>
+
+    <div>
+      <label class="label" for="passwordConfirm">Nhập lại mật khẩu mới</label>
+      <input class="input" type="password" id="passwordConfirm" name="passwordConfirm" required
+             autocomplete="new-password">
+    </div>
+
+    <button type="submit" class="btn btn-dark btn-block btn-lg">Đổi mật khẩu</button>
+  </form>
+</div>
+</body>
+</html>

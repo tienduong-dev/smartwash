@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/seller}">
+<head><title>Nhân sự</title></head>
+<body>
+<h1 layout:fragment="pageTitle">Nhân sự gian hàng</h1>
+<p layout:fragment="pageSubtitle">Ai được làm gì trong gian hàng này</p>
+
+<div layout:fragment="content">
+  <div class="grid lg:grid-cols-[1fr_340px] gap-6 items-start">
+
+    <div class="card overflow-x-auto">
+      <table class="table table-hover">
+        <thead>
+          <tr><th>Thành viên</th><th>Vai trò</th><th>Quyền</th><th>Trạng thái</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr th:each="m : ${nhanSu}">
+            <td>
+              <div class="flex items-center gap-3">
+                <span class="w-9 h-9 rounded-full bg-ink text-white text-xs font-bold grid place-items-center shrink-0"
+                      th:text="${m.user.initial}">A</span>
+                <div class="min-w-0">
+                  <p class="font-medium truncate" th:text="${m.user.fullName}">…</p>
+                  <p class="text-[12px] text-faint truncate" th:text="${m.user.email}">…</p>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge" th:classappend="${m.owner} ? ' badge-dark' : ' badge-neutral'"
+                    th:text="${m.roleLabel}">…</span>
+            </td>
+            <td class="text-muted text-sm" th:text="${m.permissionSummary}">…</td>
+            <td><span class="badge" th:classappend="' ' + ${m.statusBadge}" th:text="${m.statusLabel}">…</span></td>
+            <td class="text-right">
+              <details th:if="${!m.owner and m.active}" class="inline-block text-left">
+                <summary class="btn btn-ghost btn-sm cursor-pointer list-none">Sửa quyền</summary>
+                <div class="card p-4 mt-2 w-64 absolute right-8 z-10 shadow-[0_12px_40px_-12px_rgb(0_0_0/0.2)]">
+                  <form th:action="@{'/seller/' + ${store.id} + '/members/' + ${m.id} + '/permissions'}"
+                        method="post" class="space-y-2.5">
+                    <label class="flex items-center gap-2.5 text-sm cursor-pointer">
+                      <input type="checkbox" name="canManageProducts" value="true" class="w-4 h-4 accent-black"
+                             th:checked="${m.canManageProducts}"> Quản lý sản phẩm
+                    </label>
+                    <label class="flex items-center gap-2.5 text-sm cursor-pointer">
+                      <input type="checkbox" name="canHandleOrders" value="true" class="w-4 h-4 accent-black"
+                             th:checked="${m.canHandleOrders}"> Xử lý đơn hàng
+                    </label>
+                    <label class="flex items-center gap-2.5 text-sm cursor-pointer">
+                      <input type="checkbox" name="canSupportCustomers" value="true" class="w-4 h-4 accent-black"
+                             th:checked="${m.canSupportCustomers}"> Hỗ trợ khách hàng
+                    </label>
+                    <label class="flex items-center gap-2.5 text-sm cursor-pointer">
+                      <input type="checkbox" name="canViewReports" value="true" class="w-4 h-4 accent-black"
+                             th:checked="${m.canViewReports}"> Xem báo cáo
+                    </label>
+                    <button type="submit" class="btn btn-dark btn-sm btn-block mt-2">Lưu</button>
+                  </form>
+                </div>
+              </details>
+
+              <form th:if="${!m.owner and m.active}"
+                    th:action="@{'/seller/' + ${store.id} + '/members/' + ${m.id} + '/revoke'}"
+                    method="post" class="inline-block"
+                    onsubmit="return confirm('Thu hồi quyền truy cập của người này?');">
+                <button type="submit" class="btn btn-ghost btn-sm text-red-600">Thu hồi</button>
+              </form>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card p-5 lg:sticky lg:top-24">
+      <p class="font-semibold mb-1">Thêm nhân viên</p>
+      <p class="text-[13px] text-muted mb-4">
+        Người được thêm phải đã có tài khoản SmartWash.
+      </p>
+
+      <form th:action="@{'/seller/' + ${store.id} + '/members'}" method="post" class="space-y-3.5">
+        <div>
+          <label class="label" for="email">Email tài khoản</label>
+          <input class="input" type="email" id="email" name="email" required placeholder="nhanvien@example.com">
+        </div>
+
+        <fieldset class="space-y-2.5 pt-1">
+          <legend class="label mb-1">Quyền</legend>
+          <label class="flex items-center gap-2.5 text-sm cursor-pointer">
+            <input type="checkbox" name="canManageProducts" value="true" class="w-4 h-4 accent-black"> Quản lý sản phẩm
+          </label>
+          <label class="flex items-center gap-2.5 text-sm cursor-pointer">
+            <input type="checkbox" name="canHandleOrders" value="true" class="w-4 h-4 accent-black"> Xử lý đơn hàng
+          </label>
+          <label class="flex items-center gap-2.5 text-sm cursor-pointer">
+            <input type="checkbox" name="canSupportCustomers" value="true" class="w-4 h-4 accent-black"> Hỗ trợ khách hàng
+          </label>
+          <label class="flex items-center gap-2.5 text-sm cursor-pointer">
+            <input type="checkbox" name="canViewReports" value="true" class="w-4 h-4 accent-black"> Xem báo cáo
+          </label>
+        </fieldset>
+
+        <button type="submit" class="btn btn-dark btn-block">Thêm vào gian hàng</button>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>

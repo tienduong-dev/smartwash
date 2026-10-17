@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/app}">
+<head><title>Kênh người bán</title></head>
+<body>
+<div layout:fragment="content" class="mx-auto max-w-[1280px] px-6 lg:px-10 py-8">
+
+  <div class="flex items-start justify-between gap-4 flex-wrap">
+    <div>
+      <p class="eyebrow mb-3">Kênh người bán</p>
+      <h1 class="display-2">Bán máy giặt<br>trên SmartWash.</h1>
+      <p class="mt-4 text-[15px] text-muted max-w-lg leading-relaxed">
+        Mỗi gian hàng bán đúng một thương hiệu. Nộp hồ sơ kèm giấy tờ uỷ quyền,
+        sau khi được duyệt bạn đăng sản phẩm và nhận đơn ngay.
+      </p>
+    </div>
+    <a th:href="@{/seller/register}" class="btn btn-dark btn-lg">
+      Mở gian hàng mới
+      <svg th:replace="~{fragments/icons :: arrow('17')}"></svg>
+    </a>
+  </div>
+
+  <!-- ===================== Gian hàng đang vận hành ===================== -->
+  <section class="mt-14" th:if="${!#lists.isEmpty(gianHang)}">
+    <h2 class="text-[17px] font-bold tracking-[-0.02em]">Gian hàng của bạn</h2>
+    <div class="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <a th:each="s : ${gianHang}" th:href="@{'/seller/' + ${s.id} + '/dashboard'}"
+         class="card p-5 hover:shadow-[0_12px_40px_-16px_rgb(0_0_0/0.15)] transition">
+        <div class="flex items-start gap-3">
+          <img th:src="${s.logoUrl}" alt="" class="w-11 h-11 rounded-xl object-cover bg-line-soft">
+          <div class="min-w-0 flex-1">
+            <p class="font-semibold leading-snug truncate" th:text="${s.name}">…</p>
+            <p class="text-[13px] text-muted truncate" th:text="${s.brandName}">…</p>
+          </div>
+        </div>
+        <div class="mt-4 flex items-center gap-2">
+          <span class="badge" th:classappend="' ' + ${s.statusBadge}" th:text="${s.statusLabel}">…</span>
+          <span class="badge badge-neutral" th:text="${s.storeTypeLabel}">…</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ========================== Hồ sơ đã nộp ========================== -->
+  <section class="mt-14">
+    <h2 class="text-[17px] font-bold tracking-[-0.02em]">Hồ sơ đã nộp</h2>
+
+    <div th:if="${#lists.isEmpty(hoSo)}" class="card mt-4">
+      <div th:replace="~{fragments/alerts :: empty('Bạn chưa nộp hồ sơ nào', 'Nộp hồ sơ để mở gian hàng đầu tiên.')}"></div>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(hoSo)}" class="card mt-4 overflow-x-auto">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Mã hồ sơ</th><th>Gian hàng</th><th>Thương hiệu</th>
+            <th>Loại</th><th>Trạng thái</th><th>Ngày nộp</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="r : ${hoSo}">
+            <td class="tnum font-medium" th:text="${r.code}">…</td>
+            <td th:text="${r.storeName}">…</td>
+            <td class="text-muted" th:text="${r.brandDisplay}">…</td>
+            <td class="text-muted" th:text="${r.storeTypeLabel}">…</td>
+            <td><span class="badge" th:classappend="' ' + ${r.statusBadge}" th:text="${r.statusLabel}">…</span></td>
+            <td class="text-muted tnum" th:text="${#temporals.format(r.createdAt, 'dd/MM/yyyy')}">…</td>
+            <td class="text-right">
+              <a th:href="@{'/seller/registration/' + ${r.id}}" class="btn btn-ghost btn-sm">Chi tiết</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ========================== Quy trình ========================== -->
+  <section class="mt-16 panel p-8">
+    <h2 class="text-[17px] font-bold tracking-[-0.02em]">Quy trình mở gian hàng</h2>
+    <ol class="mt-6 grid md:grid-cols-4 gap-6">
+      <li>
+        <p class="text-2xl font-bold tnum text-brand-500">01</p>
+        <p class="mt-2 font-semibold">Nộp hồ sơ</p>
+        <p class="mt-1 text-sm text-muted leading-relaxed">Khai tên gian hàng, chọn thương hiệu và loại hình kinh doanh.</p>
+      </li>
+      <li>
+        <p class="text-2xl font-bold tnum text-brand-500">02</p>
+        <p class="mt-2 font-semibold">Tải giấy tờ</p>
+        <p class="mt-1 text-sm text-muted leading-relaxed">Giấy phép kinh doanh, thư uỷ quyền hoặc hợp đồng phân phối.</p>
+      </li>
+      <li>
+        <p class="text-2xl font-bold tnum text-brand-500">03</p>
+        <p class="mt-2 font-semibold">Chờ thẩm định</p>
+        <p class="mt-1 text-sm text-muted leading-relaxed">Quản trị viên kiểm tra và có thể yêu cầu bổ sung giấy tờ.</p>
+      </li>
+      <li>
+        <p class="text-2xl font-bold tnum text-brand-500">04</p>
+        <p class="mt-2 font-semibold">Bắt đầu bán</p>
+        <p class="mt-1 text-sm text-muted leading-relaxed">Gian hàng mở, bạn đăng sản phẩm thuộc đúng thương hiệu đã duyệt.</p>
+      </li>
+    </ol>
+  </section>
+</div>
+</body>
+</html>

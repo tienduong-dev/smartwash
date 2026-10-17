@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin}">
+<head><title th:text="'Hồ sơ ' + ${hoSo.code}">Hồ sơ</title></head>
+<body>
+<h1 layout:fragment="pageTitle" th:text="${hoSo.storeName}">…</h1>
+<p layout:fragment="pageSubtitle" th:text="'Hồ sơ ' + ${hoSo.code} + ' · ' + ${hoSo.applicant.fullName}">…</p>
+<div layout:fragment="pageActions">
+  <span class="badge" th:classappend="' ' + ${hoSo.statusBadge}" th:text="${hoSo.statusLabel}">…</span>
+</div>
+
+<div layout:fragment="content">
+  <a th:href="@{/admin/registrations}" class="text-sm text-muted hover:text-ink transition">← Danh sách hồ sơ</a>
+
+  <!-- BR-02: cảnh báo trùng thương hiệu -->
+  <div th:if="${nghiTrung != null and !#lists.isEmpty(nghiTrung)}" class="alert alert-info mt-5">
+    <svg th:replace="~{fragments/icons :: info('18')}"></svg>
+    <div>
+      <p class="font-semibold mb-1">Thương hiệu đề xuất có thể trùng với thương hiệu đã có</p>
+      <p class="mb-2">
+        Tên <span class="font-medium" th:text="${hoSo.requestedBrandName}">…</span> chuẩn hoá ra cùng khoá với:
+      </p>
+      <ul class="space-y-1">
+        <li th:each="b : ${nghiTrung}">
+          <a th:href="@{'/admin/brands/' + ${b.id}}" class="link-underline font-medium" th:text="${b.name}">…</a>
+          <span class="text-[13px]" th:text="' — ' + ${b.statusLabel}">…</span>
+        </li>
+      </ul>
+      <p class="mt-2 text-[13px]">
+        Nếu đúng là một, hãy chọn thương hiệu có sẵn ở khung duyệt bên dưới thay vì tạo mới.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-[1fr_380px] gap-6 mt-6 items-start">
+
+    <div class="space-y-6">
+
+      <!-- Thông tin hồ sơ -->
+      <div class="card p-6">
+        <p class="font-semibold mb-4">Thông tin khai báo</p>
+        <dl class="grid sm:grid-cols-2 gap-x-6 gap-y-3.5 text-sm">
+          <div><dt class="text-muted mb-0.5">Tên gian hàng</dt><dd class="font-medium" th:text="${hoSo.storeName}">…</dd></div>
+          <div><dt class="text-muted mb-0.5">Loại hình</dt><dd th:text="${hoSo.storeTypeLabel}">…</dd></div>
+          <div><dt class="text-muted mb-0.5">Thương hiệu</dt>
+            <dd>
+              <span class="font-medium" th:text="${hoSo.brandDisplay}">…</span>
+              <span th:if="${hoSo.newBrandProposal}" class="badge badge-warning ml-1">Mới</span>
+            </dd></div>
+          <div><dt class="text-muted mb-0.5">Đường dẫn đề xuất</dt>
+            <dd><code class="text-[13px]" th:text="${hoSo.storeSlugProposed}">…</code></dd></div>
+          <div><dt class="text-muted mb-0.5">Điện thoại</dt><dd class="tnum" th:text="${hoSo.contactPhone ?: '—'}">…</dd></div>
+          <div><dt class="text-muted mb-0.5">Email</dt><dd th:text="${hoSo.contactEmail ?: '—'}">…</dd></div>
+          <div class="sm:col-span-2"><dt class="text-muted mb-0.5">Địa chỉ lấy hàng</dt>
+            <dd th:text="${hoSo.pickupAddress ?: '—'}">…</dd></div>
+          <div class="sm:col-span-2" th:if="${hoSo.applicantNote != null}">
+            <dt class="text-muted mb-0.5">Ghi chú của người nộp</dt>
+            <dd class="leading-relaxed" th:text="${hoSo.applicantNote}">…</dd></div>
+        </dl>
+
+        <div class="divider"></div>
+
+        <dl class="grid sm:grid-cols-2 gap-x-6 gap-y-3.5 text-sm">
+          <div><dt class="text-muted mb-0.5">Người nộp</dt>
+            <dd>
+              <a th:href="@{'/admin/users/' + ${hoSo.applicant.id}}" class="link-underline font-medium"
+                 th:text="${hoSo.applicant.fullName}">…</a>
+              <span class="text-muted" th:text="' · ' + ${hoSo.applicant.email}">…</span>
+            </dd></div>
+          <div><dt class="text-muted mb-0.5">Doanh nghiệp</dt>
+            <dd th:text="${hoSo.business != null ? hoSo.business.legalName : 'Chưa khai — sẽ tạo khi duyệt'}">…</dd></div>
+        </dl>
+      </div>
+
+      <!-- Giấy tờ -->
+      <div class="card p-6">
+        <div class="flex items-center justify-between gap-4 mb-4">
+          <p class="font-semibold">Giấy tờ</p>
+          <span class="text-[13px] text-muted tnum" th:text="${#lists.size(hoSo.documents)} + ' tệp'">…</span>
+        </div>
+
+        <div th:if="${#lists.isEmpty(hoSo.documents)}" class="alert alert-error">
+          <svg th:replace="~{fragments/icons :: x('18')}"></svg>
+          <p>Người nộp chưa tải giấy tờ nào. Nên yêu cầu bổ sung trước khi duyệt.</p>
+        </div>
+
+        <ul class="divide-y divide-line-soft" th:unless="${#lists.isEmpty(hoSo.documents)}">
+          <li th:each="d : ${hoSo.documents}" class="py-4">
+            <div class="flex items-center gap-3">
+              <span class="w-9 h-9 rounded-lg bg-line-soft grid place-items-center text-muted shrink-0">
+                <svg th:replace="~{fragments/icons :: file('17')}"></svg>
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium" th:text="${d.typeLabel}">…</p>
+                <p class="text-[12px] text-faint truncate">
+                  <span th:text="${d.originalName}">…</span>
+                  <span th:if="${d.sizeLabel != ''}" class="tnum" th:text="' · ' + ${d.sizeLabel}">…</span>
+                </p>
+              </div>
+              <span class="badge shrink-0" th:classappend="' ' + ${d.statusBadge}" th:text="${d.statusLabel}">…</span>
+              <a th:href="@{'/seller/documents/' + ${d.id}}" target="_blank" rel="noopener"
+                 class="btn btn-outline btn-sm shrink-0">Mở tệp</a>
+            </div>
+
+            <form th:action="@{'/admin/registrations/documents/' + ${d.id}}" method="post"
+                  class="mt-3 flex gap-2 flex-wrap">
+              <input type="hidden" name="registrationId" th:value="${hoSo.id}">
+              <input class="input flex-1 min-w-[180px]" name="note" th:value="${d.note}"
+                     placeholder="Ghi chú về giấy tờ này…">
+              <select class="select w-auto" name="status">
+                <option value="PENDING"           th:selected="${d.status == 'PENDING'}">Chờ kiểm tra</option>
+                <option value="ACCEPTED"          th:selected="${d.status == 'ACCEPTED'}">Hợp lệ</option>
+                <option value="NEEDS_REPLACEMENT" th:selected="${d.status == 'NEEDS_REPLACEMENT'}">Cần nộp lại</option>
+              </select>
+              <button type="submit" class="btn btn-ghost btn-sm">Lưu</button>
+            </form>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Khung thao tác -->
+    <div class="space-y-4 lg:sticky lg:top-24">
+
+      <div th:if="${hoSo.reviewNote != null}" class="card p-5">
+        <p class="font-semibold mb-2">Ghi chú thẩm định gần nhất</p>
+        <p class="text-sm text-muted leading-relaxed" th:text="${hoSo.reviewNote}">…</p>
+        <p th:if="${hoSo.reviewedBy != null}" class="mt-2 text-[12px] text-faint"
+           th:text="${hoSo.reviewedBy.fullName} + ' · ' + ${#temporals.format(hoSo.reviewedAt, 'HH:mm dd/MM/yyyy')}">…</p>
+      </div>
+
+      <div th:if="${hoSo.createdStore != null}" class="card p-5">
+        <p class="font-semibold mb-2">Gian hàng đã tạo</p>
+        <a th:href="@{'/admin/stores/' + ${hoSo.createdStore.id}}" class="btn btn-dark btn-block btn-sm"
+           th:text="${hoSo.createdStore.name}">…</a>
+      </div>
+
+      <th:block th:if="${hoSo.reviewable}">
+
+        <form th:if="${hoSo.status == 'PENDING'}" th:action="@{'/admin/registrations/' + ${hoSo.id} + '/review'}"
+              method="post">
+          <button type="submit" class="btn btn-outline btn-block">Tiếp nhận thẩm định</button>
+        </form>
+
+        <!-- Duyệt -->
+        <div class="card p-5">
+          <p class="font-semibold mb-1">Duyệt hồ sơ</p>
+          <p class="text-[13px] text-muted mb-4">
+            Thao tác này tạo gian hàng, gắn thương hiệu và cấp quyền chủ gian hàng — tất cả trong một lần.
+          </p>
+          <form th:action="@{'/admin/registrations/' + ${hoSo.id} + '/approve'}" method="post" class="space-y-3">
+            <div th:if="${hoSo.newBrandProposal}">
+              <label class="label" for="brandId">Gắn vào thương hiệu</label>
+              <select class="select" id="brandId" name="brandId">
+                <option value="">Tạo thương hiệu mới: <span th:text="${hoSo.requestedBrandName}">…</span></option>
+                <option th:each="b : ${thuongHieu}" th:value="${b.id}" th:text="${b.name}">…</option>
+              </select>
+              <p class="form-hint">Chọn thương hiệu có sẵn nếu đây chỉ là cách viết khác.</p>
+            </div>
+            <div>
+              <label class="label" for="noteApprove">Ghi chú</label>
+              <input class="input" id="noteApprove" name="note" placeholder="Không bắt buộc">
+            </div>
+            <button type="submit" class="btn btn-brand btn-block">Duyệt và mở gian hàng</button>
+          </form>
+        </div>
+
+        <!-- Yêu cầu bổ sung -->
+        <div class="card p-5">
+          <p class="font-semibold mb-3">Yêu cầu bổ sung</p>
+          <form th:action="@{'/admin/registrations/' + ${hoSo.id} + '/need-info'}" method="post" class="space-y-3">
+            <textarea class="input" name="note" rows="3" required
+                      placeholder="Nêu rõ cần bổ sung giấy tờ hay thông tin gì"></textarea>
+            <button type="submit" class="btn btn-outline btn-block">Gửi yêu cầu</button>
+          </form>
+        </div>
+
+        <!-- Từ chối -->
+        <div class="card p-5">
+          <p class="font-semibold mb-3">Từ chối hồ sơ</p>
+          <form th:action="@{'/admin/registrations/' + ${hoSo.id} + '/reject'}" method="post" class="space-y-3"
+                onsubmit="return confirm('Từ chối hồ sơ này? Người nộp sẽ phải nộp lại từ đầu.');">
+            <textarea class="input" name="note" rows="3" required placeholder="Lý do từ chối"></textarea>
+            <button type="submit" class="btn btn-danger btn-block">Từ chối</button>
+          </form>
+        </div>
+      </th:block>
+    </div>
+  </div>
+</div>
+</body>
+</html>

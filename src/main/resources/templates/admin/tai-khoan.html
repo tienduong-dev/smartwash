@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin}">
+<head><title>Tài khoản</title></head>
+<body>
+<h1 layout:fragment="pageTitle">Tài khoản</h1>
+<p layout:fragment="pageSubtitle" th:text="${ds.total} + ' tài khoản'">…</p>
+
+<div layout:fragment="content">
+  <form method="get" class="card p-4 mb-5 grid md:grid-cols-[1fr_190px_190px_auto] gap-3">
+    <input class="input" name="q" th:value="${q}" placeholder="Tìm theo tên, email hoặc số điện thoại…">
+    <select class="select" name="status">
+      <option value="">Mọi trạng thái</option>
+      <option value="ACTIVE"               th:selected="${status == 'ACTIVE'}">Đang hoạt động</option>
+      <option value="LOCKED"               th:selected="${status == 'LOCKED'}">Đã khoá</option>
+      <option value="PENDING_VERIFICATION" th:selected="${status == 'PENDING_VERIFICATION'}">Chờ xác minh</option>
+    </select>
+    <select class="select" name="role">
+      <option value="">Mọi vai trò</option>
+      <option th:each="r : ${vaiTro}" th:value="${r.code}" th:text="${r.label}"
+              th:selected="${role == r.code}">…</option>
+    </select>
+    <button type="submit" class="btn btn-dark">Lọc</button>
+  </form>
+
+  <div class="card overflow-x-auto">
+    <div th:if="${ds.empty}">
+      <div th:replace="~{fragments/alerts :: empty('Không tìm thấy tài khoản', 'Thử từ khoá khác.')}"></div>
+    </div>
+
+    <table class="table table-hover" th:unless="${ds.empty}">
+      <thead>
+        <tr><th>Người dùng</th><th>Số điện thoại</th><th>Vai trò</th><th>Trạng thái</th>
+            <th>Đăng nhập gần nhất</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr th:each="u : ${ds.items}">
+          <td>
+            <div class="flex items-center gap-3">
+              <span class="w-9 h-9 rounded-full bg-ink text-white text-xs font-bold grid place-items-center shrink-0"
+                    th:text="${u.initial}">A</span>
+              <div class="min-w-0">
+                <p class="font-medium truncate" th:text="${u.fullName}">…</p>
+                <p class="text-[12px] text-faint truncate" th:text="${u.email}">…</p>
+              </div>
+            </div>
+          </td>
+          <td class="tnum text-muted" th:text="${u.phone ?: '—'}">…</td>
+          <td class="text-muted text-sm" th:text="${u.roleLabels}">…</td>
+          <td><span class="badge" th:classappend="' ' + ${u.statusBadge}" th:text="${u.statusLabel}">…</span></td>
+          <td class="tnum text-muted"
+              th:text="${u.lastLoginAt != null} ? ${#temporals.format(u.lastLoginAt, 'HH:mm dd/MM/yyyy')} : '—'">…</td>
+          <td class="text-right"><a th:href="@{'/admin/users/' + ${u.id}}" class="btn btn-ghost btn-sm">Mở</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <nav th:replace="~{fragments/pagination :: paging(${ds})}"></nav>
+</div>
+</body>
+</html>

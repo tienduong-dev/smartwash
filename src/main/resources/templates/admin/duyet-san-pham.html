@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin}">
+<head><title>Sản phẩm</title></head>
+<body>
+<h1 layout:fragment="pageTitle">Sản phẩm toàn sàn</h1>
+<p layout:fragment="pageSubtitle" th:text="${ds.total} + ' sản phẩm · hàng chờ duyệt xếp lên đầu'">…</p>
+
+<div layout:fragment="content">
+  <form method="get" class="card p-4 mb-5 grid md:grid-cols-[1fr_200px_220px_auto] gap-3">
+    <input class="input" name="q" th:value="${q}" placeholder="Tìm theo tên hoặc mã model…">
+    <select class="select" name="status">
+      <option value="">Mọi trạng thái</option>
+      <option value="PENDING_REVIEW" th:selected="${status == 'PENDING_REVIEW'}">Chờ duyệt</option>
+      <option value="ACTIVE"         th:selected="${status == 'ACTIVE'}">Đang bán</option>
+      <option value="REJECTED"       th:selected="${status == 'REJECTED'}">Bị từ chối</option>
+      <option value="SUSPENDED"      th:selected="${status == 'SUSPENDED'}">Bị gỡ</option>
+      <option value="DRAFT"          th:selected="${status == 'DRAFT'}">Bản nháp</option>
+      <option value="INACTIVE"       th:selected="${status == 'INACTIVE'}">Ngừng bán</option>
+    </select>
+    <select class="select" name="storeId">
+      <option value="">Mọi gian hàng</option>
+      <option th:each="s : ${gianHang}" th:value="${s.id}" th:text="${s.name}"
+              th:selected="${storeId != null and storeId == s.id}">…</option>
+    </select>
+    <button type="submit" class="btn btn-dark">Lọc</button>
+  </form>
+
+  <div class="card overflow-x-auto">
+    <div th:if="${ds.empty}">
+      <div th:replace="~{fragments/alerts :: empty('Không có sản phẩm nào', 'Thử bỏ bớt điều kiện lọc.')}"></div>
+    </div>
+
+    <table class="table table-hover" th:unless="${ds.empty}">
+      <thead>
+        <tr><th>Sản phẩm</th><th>Gian hàng</th><th>Thương hiệu</th><th>Giá</th>
+            <th>Trạng thái</th><th>Nộp lúc</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr th:each="p : ${ds.items}">
+          <td><div th:replace="~{fragments/san-pham :: dong(${p})}"></div></td>
+          <td class="text-muted truncate" th:text="${p.storeName}">…</td>
+          <td class="text-muted" th:text="${p.brandName}">…</td>
+          <td class="tnum font-medium"
+              th:text="${#numbers.formatInteger(p.effectivePrice, 0, 'POINT')} + '₫'">0₫</td>
+          <td><span class="badge" th:classappend="' ' + ${p.statusBadge}" th:text="${p.statusLabel}">…</span></td>
+          <td class="tnum text-muted"
+              th:text="${p.submittedAt != null} ? ${#temporals.format(p.submittedAt, 'HH:mm dd/MM')} : '—'">—</td>
+          <td class="text-right">
+            <a th:href="@{'/admin/products/' + ${p.id}}"
+               class="btn btn-sm"
+               th:classappend="${p.awaitingReview} ? ' btn-dark' : ' btn-ghost'"
+               th:text="${p.awaitingReview} ? 'Duyệt' : 'Mở'">Mở</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <nav th:replace="~{fragments/pagination :: paging(${ds})}"></nav>
+</div>
+</body>
+</html>

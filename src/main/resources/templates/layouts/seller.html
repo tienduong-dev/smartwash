@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title layout:title-pattern="$CONTENT_TITLE — Kênh người bán">Kênh người bán</title>
+  <meta name="csrf-token" th:content="${_csrf != null ? _csrf.token : ''}">
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+  <link rel="icon" th:href="@{/img/favicon.svg}" type="image/svg+xml">
+  <th:block layout:fragment="head"></th:block>
+</head>
+<body class="bg-canvas">
+
+<div class="flex min-h-screen">
+
+  <aside class="w-[248px] shrink-0 bg-white border-r border-line flex-col fixed inset-y-0 left-0 hidden lg:flex">
+    <div class="h-18 flex items-center gap-2.5 px-5 border-b border-line-soft">
+      <svg th:replace="~{fragments/icons :: logo('24')}"></svg>
+      <div class="leading-tight min-w-0">
+        <p class="font-extrabold tracking-[-0.03em] text-[15px] truncate">SmartWash</p>
+        <p class="text-[11px] text-faint">Kênh người bán</p>
+      </div>
+    </div>
+
+    <!-- Gian hàng đang làm việc -->
+    <div th:if="${gianHangHienTai != null}" class="px-3 pt-4">
+      <div class="rounded-xl border border-line p-3">
+        <p class="text-[11px] uppercase tracking-wider text-faint font-semibold">Gian hàng</p>
+        <p class="mt-1 text-sm font-semibold leading-snug" th:text="${gianHangHienTai.name}">…</p>
+        <p class="mt-0.5 text-[12px] text-muted" th:text="${gianHangHienTai.brandName}">…</p>
+        <span class="mt-2 inline-flex badge"
+              th:classappend="' ' + ${gianHangHienTai.statusBadge}"
+              th:text="${gianHangHienTai.statusLabel}">…</span>
+      </div>
+      <a th:if="${gianHangCuaToi != null and #lists.size(gianHangCuaToi) > 1}"
+         th:href="@{/seller}" class="mt-2 block text-[12px] text-muted hover:text-ink transition text-center">
+        Đổi gian hàng khác
+      </a>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto scroll-thin px-3 py-4" th:if="${gianHangHienTai != null}">
+      <a th:href="@{'/seller/' + ${gianHangHienTai.id} + '/dashboard'}" class="nav-link"
+         th:classappend="${#strings.endsWith(currentPath, '/dashboard')} ? ' active' : ''">
+        <svg th:replace="~{fragments/icons :: grid('18')}"></svg> Tổng quan
+      </a>
+
+      <p class="nav-group-label">Bán hàng</p>
+      <a th:href="@{'/seller/' + ${gianHangHienTai.id} + '/products'}" class="nav-link"
+         th:classappend="${#strings.contains(currentPath, '/products')} ? ' active' : ''">
+        <svg th:replace="~{fragments/icons :: box('18')}"></svg> Sản phẩm
+      </a>
+      <a th:href="@{'/seller/' + ${gianHangHienTai.id} + '/orders'}" class="nav-link"
+         th:classappend="${#strings.contains(currentPath, '/orders')} ? ' active' : ''">
+        <svg th:replace="~{fragments/icons :: bag('18')}"></svg> Đơn hàng
+      </a>
+
+      <p class="nav-group-label">Gian hàng</p>
+      <a th:href="@{'/seller/' + ${gianHangHienTai.id} + '/profile'}" class="nav-link"
+         th:classappend="${#strings.endsWith(currentPath, '/profile')} ? ' active' : ''">
+        <svg th:replace="~{fragments/icons :: store('18')}"></svg> Thông tin gian hàng
+      </a>
+      <a th:href="@{'/seller/' + ${gianHangHienTai.id} + '/members'}" class="nav-link"
+         th:classappend="${#strings.endsWith(currentPath, '/members')} ? ' active' : ''">
+        <svg th:replace="~{fragments/icons :: users('18')}"></svg> Nhân sự
+      </a>
+    </nav>
+
+    <div class="p-3 border-t border-line-soft mt-auto">
+      <div class="flex items-center gap-3 p-2.5 rounded-xl">
+        <span class="w-9 h-9 rounded-full bg-ink text-white text-xs font-bold grid place-items-center"
+              th:text="${authUser != null ? authUser.initial : '?'}">D</span>
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-semibold truncate" th:text="${authUser != null ? authUser.fullName : ''}">…</p>
+          <p class="text-[11px] text-faint truncate" th:text="${authUser != null ? authUser.email : ''}">…</p>
+        </div>
+        <form th:action="@{/logout}" method="post">
+          <button type="submit" class="btn-icon" title="Đăng xuất" aria-label="Đăng xuất">
+            <svg th:replace="~{fragments/icons :: logout('17')}"></svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </aside>
+
+  <div class="flex-1 lg:ml-[248px] min-w-0">
+    <header class="h-18 bg-white border-b border-line sticky top-0 z-30 flex items-center gap-4 px-6 lg:px-8">
+      <div class="min-w-0">
+        <h1 class="text-[17px] font-bold tracking-[-0.02em] truncate" layout:fragment="pageTitle">Kênh người bán</h1>
+        <p class="text-[13px] text-muted truncate" layout:fragment="pageSubtitle"></p>
+      </div>
+      <div class="flex-1"></div>
+      <div layout:fragment="pageActions" class="flex items-center gap-2"></div>
+      <a th:href="@{/}" class="btn btn-ghost btn-sm hidden md:inline-flex">Về trang chủ</a>
+    </header>
+
+    <div class="p-6 lg:p-8">
+      <div th:replace="~{fragments/alerts :: alerts}" class="mb-6"></div>
+      <div layout:fragment="content"></div>
+    </div>
+  </div>
+</div>
+
+<th:block layout:fragment="scripts"></th:block>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin}">
+<head><title>Nhật ký thao tác</title></head>
+<body>
+<h1 layout:fragment="pageTitle">Nhật ký thao tác</h1>
+<p layout:fragment="pageSubtitle">Ai làm gì, lúc nào, trên đối tượng nào</p>
+
+<div layout:fragment="content">
+  <form method="get" class="card p-4 mb-5 grid md:grid-cols-[1fr_1fr_160px_160px_auto] gap-3">
+    <select class="select" name="action">
+      <option value="">Mọi hành động</option>
+      <option th:each="a : ${cacHanhDong}" th:value="${a}" th:text="${a}" th:selected="${action == a}">…</option>
+    </select>
+    <select class="select" name="entityType">
+      <option value="">Mọi đối tượng</option>
+      <option th:each="t : ${cacLoai}" th:value="${t}" th:text="${t}" th:selected="${entityType == t}">…</option>
+    </select>
+    <input class="input" type="date" name="from" th:value="${from}">
+    <input class="input" type="date" name="to" th:value="${to}">
+    <button type="submit" class="btn btn-dark">Lọc</button>
+  </form>
+
+  <div class="card overflow-x-auto">
+    <div th:if="${ds.empty}">
+      <div th:replace="~{fragments/alerts :: empty('Chưa có bản ghi nào', 'Nhật ký ghi lại các thao tác nhạy cảm như duyệt hồ sơ hay khoá tài khoản.')}"></div>
+    </div>
+
+    <table class="table" th:unless="${ds.empty}">
+      <thead>
+        <tr><th>Thời điểm</th><th>Người thực hiện</th><th>Hành động</th>
+            <th>Đối tượng</th><th>Lý do / thay đổi</th><th>IP</th></tr>
+      </thead>
+      <tbody>
+        <tr th:each="a : ${ds.items}" class="align-top">
+          <td class="tnum whitespace-nowrap text-muted"
+              th:text="${#temporals.format(a.createdAt, 'HH:mm dd/MM/yy')}">…</td>
+          <td class="whitespace-nowrap" th:text="${a.actorName}">…</td>
+          <td><code class="text-[12px]" th:text="${a.action}">…</code></td>
+          <td class="text-muted whitespace-nowrap">
+            <span th:text="${a.entityType}">…</span>
+            <span th:if="${a.entityId != null}" class="tnum" th:text="'#' + ${a.entityId}">…</span>
+          </td>
+          <td class="max-w-md">
+            <p th:if="${a.reason != null}" class="text-sm" th:text="${a.reason}">…</p>
+            <p th:if="${a.oldValue != null}" class="text-[12px] text-faint truncate"
+               th:text="'trước: ' + ${a.oldValue}">…</p>
+            <p th:if="${a.newValue != null}" class="text-[12px] text-muted truncate"
+               th:text="'sau: ' + ${a.newValue}">…</p>
+          </td>
+          <td class="tnum text-[12px] text-faint" th:text="${a.ipAddress ?: '—'}">…</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <nav th:replace="~{fragments/pagination :: paging(${ds})}"></nav>
+</div>
+</body>
+</html>

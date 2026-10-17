@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin}">
+<head><title>Doanh nghiệp</title></head>
+<body>
+<h1 layout:fragment="pageTitle">Doanh nghiệp</h1>
+<p layout:fragment="pageSubtitle" th:text="${ds.total} + ' pháp nhân'">…</p>
+
+<div layout:fragment="content">
+  <form method="get" class="card p-4 mb-5 grid md:grid-cols-[1fr_200px_auto] gap-3">
+    <input class="input" name="q" th:value="${q}" placeholder="Tìm theo tên pháp nhân hoặc mã số thuế…">
+    <select class="select" name="status">
+      <option value="">Mọi trạng thái</option>
+      <option value="PENDING"  th:selected="${status == 'PENDING'}">Chờ xác minh</option>
+      <option value="VERIFIED" th:selected="${status == 'VERIFIED'}">Đã xác minh</option>
+      <option value="REJECTED" th:selected="${status == 'REJECTED'}">Từ chối</option>
+    </select>
+    <button type="submit" class="btn btn-dark">Lọc</button>
+  </form>
+
+  <div class="card overflow-x-auto">
+    <div th:if="${ds.empty}">
+      <div th:replace="~{fragments/alerts :: empty('Chưa có doanh nghiệp nào', 'Doanh nghiệp được tạo khi hồ sơ mở gian hàng được duyệt.')}"></div>
+    </div>
+
+    <table class="table table-hover" th:unless="${ds.empty}">
+      <thead>
+        <tr><th>Pháp nhân</th><th>Mã số thuế</th><th>Người đại diện</th><th>Trạng thái</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr th:each="b : ${ds.items}">
+          <td>
+            <p class="font-medium" th:text="${b.legalName}">…</p>
+            <p class="text-[12px] text-faint truncate" th:text="${b.address ?: '—'}">…</p>
+          </td>
+          <td class="tnum text-muted" th:text="${b.taxCode ?: '—'}">…</td>
+          <td class="text-muted">
+            <span th:text="${b.representativeName ?: '—'}">…</span>
+            <span th:if="${b.representativePhone != null}" class="tnum text-[12px] block text-faint"
+                  th:text="${b.representativePhone}">…</span>
+          </td>
+          <td><span class="badge" th:classappend="' ' + ${b.statusBadge}" th:text="${b.statusLabel}">…</span></td>
+          <td class="text-right whitespace-nowrap">
+            <form th:if="${!b.verified}" th:action="@{'/admin/businesses/' + ${b.id} + '/verify'}"
+                  method="post" class="inline-block">
+              <button type="submit" class="btn btn-outline btn-sm">Xác minh</button>
+            </form>
+            <form th:if="${b.verificationStatus != 'REJECTED'}"
+                  th:action="@{'/admin/businesses/' + ${b.id} + '/reject'}" method="post" class="inline-block">
+              <button type="submit" class="btn btn-ghost btn-sm text-red-600">Từ chối</button>
+            </form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <nav th:replace="~{fragments/pagination :: paging(${ds})}"></nav>
+</div>
+</body>
+</html>

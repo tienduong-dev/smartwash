@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin}">
+<head><title>Tổng quan</title></head>
+<body>
+<h1 layout:fragment="pageTitle">Tổng quan</h1>
+<p layout:fragment="pageSubtitle">Tình hình sàn hôm nay</p>
+
+<div layout:fragment="content">
+
+  <!-- Việc cần xử lý -->
+  <section th:if="${soHoSoChoXuLy > 0 or soHoSoCanBoSung > 0 or soThuongHieuChoDuyet > 0 or soDoanhNghiepChoXacMinh > 0}">
+    <h2 class="text-[15px] font-bold tracking-[-0.02em] mb-3">Cần bạn xử lý</h2>
+    <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <a th:if="${soHoSoChoXuLy > 0}" th:href="@{/admin/registrations(status='PENDING')}"
+         class="card p-5 hover:shadow-[0_12px_40px_-16px_rgb(0_0_0/0.15)] transition">
+        <p class="stat-label">Hồ sơ chờ thẩm định</p>
+        <p class="stat-value tnum text-brand-500" th:text="${soHoSoChoXuLy}">0</p>
+      </a>
+      <a th:if="${soHoSoCanBoSung > 0}" th:href="@{/admin/registrations(status='NEEDS_MORE_INFO')}"
+         class="card p-5 hover:shadow-[0_12px_40px_-16px_rgb(0_0_0/0.15)] transition">
+        <p class="stat-label">Hồ sơ chờ bổ sung</p>
+        <p class="stat-value tnum" th:text="${soHoSoCanBoSung}">0</p>
+      </a>
+      <a th:if="${soThuongHieuChoDuyet > 0}" th:href="@{/admin/brands(status='PENDING_VERIFICATION')}"
+         class="card p-5 hover:shadow-[0_12px_40px_-16px_rgb(0_0_0/0.15)] transition">
+        <p class="stat-label">Thương hiệu chờ xác minh</p>
+        <p class="stat-value tnum" th:text="${soThuongHieuChoDuyet}">0</p>
+      </a>
+      <a th:if="${soDoanhNghiepChoXacMinh > 0}" th:href="@{/admin/businesses(status='PENDING')}"
+         class="card p-5 hover:shadow-[0_12px_40px_-16px_rgb(0_0_0/0.15)] transition">
+        <p class="stat-label">Doanh nghiệp chờ xác minh</p>
+        <p class="stat-value tnum" th:text="${soDoanhNghiepChoXacMinh}">0</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Số liệu chung -->
+  <section class="mt-8">
+    <h2 class="text-[15px] font-bold tracking-[-0.02em] mb-3">Quy mô sàn</h2>
+    <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div class="stat">
+        <p class="stat-label">Tài khoản</p>
+        <p class="stat-value tnum" th:text="${soTaiKhoan}">0</p>
+        <p class="text-[13px] text-muted mt-1 tnum">+<span th:text="${soTaiKhoanMoi}">0</span> trong 30 ngày</p>
+      </div>
+      <div class="stat">
+        <p class="stat-label">Gian hàng hoạt động</p>
+        <p class="stat-value tnum" th:text="${soGianHang}">0</p>
+        <p class="text-[13px] text-muted mt-1 tnum" th:if="${soGianHangTamNgung > 0}">
+          <span th:text="${soGianHangTamNgung}">0</span> đang tạm ngưng</p>
+      </div>
+      <div class="stat">
+        <p class="stat-label">Thương hiệu</p>
+        <p class="stat-value tnum" th:text="${soThuongHieu}">0</p>
+      </div>
+      <div class="stat">
+        <p class="stat-label">Hồ sơ chờ xử lý</p>
+        <p class="stat-value tnum" th:text="${soHoSoChoXuLy}">0</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hồ sơ mới nhất -->
+  <section class="mt-8">
+    <div class="flex items-center justify-between gap-4 mb-3">
+      <h2 class="text-[15px] font-bold tracking-[-0.02em]">Hồ sơ mới nhất</h2>
+      <a th:href="@{/admin/registrations}" class="btn btn-ghost btn-sm">Xem tất cả</a>
+    </div>
+
+    <div class="card overflow-x-auto">
+      <div th:if="${#lists.isEmpty(hoSoMoi)}">
+        <div th:replace="~{fragments/alerts :: empty('Không có hồ sơ chờ', 'Mọi hồ sơ đã được xử lý.')}"></div>
+      </div>
+
+      <table class="table table-hover" th:unless="${#lists.isEmpty(hoSoMoi)}">
+        <thead>
+          <tr><th>Mã</th><th>Gian hàng</th><th>Người nộp</th><th>Thương hiệu</th><th>Loại</th><th>Ngày nộp</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr th:each="r : ${hoSoMoi}">
+            <td class="tnum font-medium" th:text="${r.code}">…</td>
+            <td th:text="${r.storeName}">…</td>
+            <td class="text-muted" th:text="${r.applicant.fullName}">…</td>
+            <td class="text-muted" th:text="${r.brandDisplay}">…</td>
+            <td><span class="badge badge-neutral" th:text="${r.storeTypeLabel}">…</span></td>
+            <td class="text-muted tnum" th:text="${#temporals.format(r.createdAt, 'dd/MM/yyyy')}">…</td>
+            <td class="text-right">
+              <a th:href="@{'/admin/registrations/' + ${r.id}}" class="btn btn-dark btn-sm">Thẩm định</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+</body>
+</html>

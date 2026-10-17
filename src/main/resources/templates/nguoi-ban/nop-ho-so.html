@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/app}">
+<head><title>Nộp hồ sơ mở gian hàng</title></head>
+<body>
+<div layout:fragment="content" class="mx-auto max-w-[1280px] px-6 lg:px-10 py-8">
+  <div class="max-w-2xl">
+
+    <a th:href="@{/seller}" class="text-sm text-muted hover:text-ink transition">← Kênh người bán</a>
+    <h1 class="mt-3 text-[22px] font-bold tracking-[-0.025em]">Nộp hồ sơ mở gian hàng</h1>
+    <p class="mt-1 text-sm text-muted">
+      Mỗi gian hàng gắn đúng một thương hiệu và không đổi được sau khi duyệt, nên hãy chọn kỹ.
+    </p>
+
+    <form th:action="@{/seller/register}" method="post" class="card p-6 mt-6 space-y-5">
+
+      <!-- Thương hiệu -->
+      <fieldset>
+        <legend class="label mb-2">Thương hiệu</legend>
+        <select class="select" name="brandId" id="brandId"
+                onchange="document.getElementById('o-brand-moi').hidden = this.value !== '';">
+          <option value="">— Thương hiệu chưa có trong danh mục —</option>
+          <option th:each="b : ${thuongHieu}" th:value="${b.id}" th:text="${b.name}"
+                  th:selected="${old != null and old.get('brandId') == #strings.toString(b.id)}">…</option>
+        </select>
+
+        <div id="o-brand-moi" class="mt-3" th:attr="hidden=${old != null and old.get('brandId') != null and old.get('brandId') != ''} ? 'hidden' : null">
+          <label class="label" for="brandMoi">Tên thương hiệu đề xuất</label>
+          <input class="input" id="brandMoi" name="brandMoi" placeholder="Ví dụ: Electrolux"
+                 th:value="${old != null ? old.get('brandMoi') : ''}">
+          <p class="form-hint">
+            Quản trị viên sẽ kiểm tra xem thương hiệu này đã tồn tại dưới tên khác chưa trước khi tạo mới.
+          </p>
+        </div>
+      </fieldset>
+
+      <div class="divider"></div>
+
+      <div>
+        <label class="label" for="storeName">Tên gian hàng</label>
+        <input class="input" id="storeName" name="storeName" required
+               placeholder="Ví dụ: Electrolux Official Store"
+               th:value="${old != null ? old.get('storeName') : ''}">
+      </div>
+
+      <div>
+        <label class="label" for="storeType">Loại gian hàng</label>
+        <select class="select" id="storeType" name="storeType" required>
+          <option value="RETAILER">Cửa hàng bán lẻ — bán hàng chính hãng nhập từ nhà phân phối</option>
+          <option value="DISTRIBUTOR">Nhà phân phối uỷ quyền — có hợp đồng phân phối với hãng</option>
+          <option value="OFFICIAL">Gian hàng chính hãng — do chính hãng vận hành</option>
+        </select>
+        <p class="form-hint">Loại gian hàng quyết định giấy tờ cần nộp và nhãn hiển thị cho khách.</p>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="label" for="contactPhone">Điện thoại liên hệ</label>
+          <input class="input" id="contactPhone" name="contactPhone" inputmode="numeric"
+                 placeholder="0912345678" th:value="${old != null ? old.get('contactPhone') : ''}">
+        </div>
+        <div>
+          <label class="label" for="contactEmail">Email liên hệ</label>
+          <input class="input" type="email" id="contactEmail" name="contactEmail"
+                 th:value="${old != null ? old.get('contactEmail') : ''}">
+        </div>
+      </div>
+
+      <div>
+        <label class="label" for="pickupAddress">Địa chỉ lấy hàng</label>
+        <input class="input" id="pickupAddress" name="pickupAddress"
+               placeholder="Kho hàng, nơi đơn vị vận chuyển đến lấy hàng"
+               th:value="${old != null ? old.get('pickupAddress') : ''}">
+      </div>
+
+      <div>
+        <label class="label" for="note">Ghi chú thêm</label>
+        <textarea class="input" id="note" name="note" rows="3"
+                  placeholder="Thông tin bạn muốn quản trị viên biết khi thẩm định"
+                  th:text="${old != null ? old.get('note') : ''}"></textarea>
+      </div>
+
+      <div class="alert alert-info">
+        <svg th:replace="~{fragments/icons :: info('18')}"></svg>
+        <p>Sau khi nộp, bạn sẽ được chuyển sang trang tải giấy tờ. Hồ sơ chỉ được thẩm định khi có đủ giấy tờ.</p>
+      </div>
+
+      <div class="flex gap-2">
+        <button type="submit" class="btn btn-dark">Nộp hồ sơ</button>
+        <a th:href="@{/seller}" class="btn btn-ghost">Huỷ</a>
+      </div>
+    </form>
+  </div>
+</div>
+</body>
+</html>

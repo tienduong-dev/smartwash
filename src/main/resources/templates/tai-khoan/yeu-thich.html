@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/app}">
+<head><title>Yêu thích</title></head>
+<body>
+<div layout:fragment="content" class="mx-auto max-w-[1280px] px-6 lg:px-10 py-8">
+
+  <h1 class="text-[22px] font-bold tracking-[-0.025em]">Sản phẩm yêu thích</h1>
+  <p class="mt-1 text-sm text-muted tnum" th:text="${ds.total} + ' sản phẩm đã lưu'">…</p>
+
+  <div th:if="${ds.empty}" class="card mt-6">
+    <div th:replace="~{fragments/alerts :: empty('Chưa lưu sản phẩm nào', 'Bấm Yêu thích ở trang sản phẩm để lưu lại xem sau.')}"></div>
+  </div>
+
+  <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-x-5 gap-y-9 mt-8" th:unless="${ds.empty}">
+    <div th:each="w : ${ds.items}">
+      <article th:replace="~{fragments/san-pham :: the(${w.product})}"></article>
+      <form th:action="@{'/wishlist/' + ${w.product.id}}" method="post" class="mt-2">
+        <input type="hidden" name="next" value="/wishlist">
+        <button type="submit" class="btn btn-ghost btn-sm text-red-600">Bỏ khỏi danh sách</button>
+      </form>
+    </div>
+  </div>
+
+  <nav th:replace="~{fragments/pagination :: paging(${ds})}"></nav>
+</div>
+</body>
+</html>

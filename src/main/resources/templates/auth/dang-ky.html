@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/auth}">
+<head><title>Đăng ký</title></head>
+<body>
+<div layout:fragment="content">
+
+  <h1 class="text-[26px] font-bold tracking-[-0.03em]">Tạo tài khoản</h1>
+  <p class="mt-2 text-sm text-muted">Đã có tài khoản?
+    <a th:href="@{/login}" class="link-underline font-medium text-ink">Đăng nhập</a>
+  </p>
+
+  <form th:action="@{/register}" method="post" class="mt-8 space-y-4">
+    <div>
+      <label class="label" for="fullName">Họ và tên</label>
+      <input class="input" id="fullName" name="fullName" required autofocus
+             th:value="${old != null ? old.get('fullName') : ''}" placeholder="Nguyễn Văn A">
+      <p th:replace="~{fragments/alerts :: fieldError('fullName')}"></p>
+    </div>
+
+    <div>
+      <label class="label" for="email">Email</label>
+      <input class="input" type="email" id="email" name="email" required autocomplete="email"
+             th:value="${old != null ? old.get('email') : ''}" placeholder="ban@example.com">
+      <p th:replace="~{fragments/alerts :: fieldError('email')}"></p>
+    </div>
+
+    <div>
+      <label class="label" for="phone">Số điện thoại <span class="text-faint font-normal">(không bắt buộc)</span></label>
+      <input class="input" id="phone" name="phone" inputmode="numeric"
+             th:value="${old != null ? old.get('phone') : ''}" placeholder="0912345678">
+      <p th:replace="~{fragments/alerts :: fieldError('phone')}"></p>
+    </div>
+
+    <div>
+      <label class="label" for="password">Mật khẩu</label>
+      <input class="input" type="password" id="password" name="password" required
+             autocomplete="new-password" placeholder="Ít nhất 8 ký tự">
+      <p th:replace="~{fragments/alerts :: fieldError('password')}"></p>
+    </div>
+
+    <div>
+      <label class="label" for="passwordConfirm">Nhập lại mật khẩu</label>
+      <input class="input" type="password" id="passwordConfirm" name="passwordConfirm" required
+             autocomplete="new-password">
+      <p th:replace="~{fragments/alerts :: fieldError('passwordConfirm')}"></p>
+    </div>
+
+    <button type="submit" class="btn btn-dark btn-block btn-lg">Tạo tài khoản</button>
+  </form>
+</div>
+</body>
+</html>

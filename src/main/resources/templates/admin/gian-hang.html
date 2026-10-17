@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin}">
+<head><title>Gian hàng</title></head>
+<body>
+<h1 layout:fragment="pageTitle">Gian hàng</h1>
+<p layout:fragment="pageSubtitle" th:text="${ds.total} + ' gian hàng'">…</p>
+
+<div layout:fragment="content">
+  <form method="get" class="card p-4 mb-5 grid md:grid-cols-[1fr_180px_180px_180px_auto] gap-3">
+    <input class="input" name="q" th:value="${q}" placeholder="Tìm theo tên gian hàng…">
+    <select class="select" name="status">
+      <option value="">Mọi trạng thái</option>
+      <option value="ACTIVE"        th:selected="${status == 'ACTIVE'}">Đang hoạt động</option>
+      <option value="PENDING_SETUP" th:selected="${status == 'PENDING_SETUP'}">Đang hoàn thiện</option>
+      <option value="SUSPENDED"     th:selected="${status == 'SUSPENDED'}">Tạm ngưng</option>
+      <option value="CLOSED"        th:selected="${status == 'CLOSED'}">Đã đóng</option>
+    </select>
+    <select class="select" name="brandId">
+      <option value="">Mọi thương hiệu</option>
+      <option th:each="b : ${thuongHieu}" th:value="${b.id}" th:text="${b.name}"
+              th:selected="${brandId != null and brandId == b.id}">…</option>
+    </select>
+    <select class="select" name="type">
+      <option value="">Mọi loại hình</option>
+      <option value="OFFICIAL"    th:selected="${type == 'OFFICIAL'}">Chính hãng</option>
+      <option value="DISTRIBUTOR" th:selected="${type == 'DISTRIBUTOR'}">Phân phối uỷ quyền</option>
+      <option value="RETAILER"    th:selected="${type == 'RETAILER'}">Bán lẻ</option>
+    </select>
+    <button type="submit" class="btn btn-dark">Lọc</button>
+  </form>
+
+  <div class="card overflow-x-auto">
+    <div th:if="${ds.empty}">
+      <div th:replace="~{fragments/alerts :: empty('Không có gian hàng nào', 'Thử bỏ bớt điều kiện lọc.')}"></div>
+    </div>
+
+    <table class="table table-hover" th:unless="${ds.empty}">
+      <thead>
+        <tr><th>Gian hàng</th><th>Thương hiệu</th><th>Doanh nghiệp</th><th>Loại</th>
+            <th>Đánh giá</th><th>Trạng thái</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr th:each="s : ${ds.items}">
+          <td>
+            <div class="flex items-center gap-3">
+              <img th:src="${s.logoUrl}" alt="" class="w-9 h-9 rounded-lg object-cover bg-line-soft shrink-0">
+              <div class="min-w-0">
+                <p class="font-medium truncate" th:text="${s.name}">…</p>
+                <code class="text-[11px] text-faint" th:text="'/' + ${s.slug}">…</code>
+              </div>
+            </div>
+          </td>
+          <td class="text-muted" th:text="${s.brandName}">…</td>
+          <td class="text-muted truncate" th:text="${s.business != null ? s.business.legalName : '—'}">…</td>
+          <td><span class="badge badge-neutral" th:text="${s.storeTypeLabel}">…</span></td>
+          <td class="tnum text-muted" th:text="${s.hasReviews()} ? ${s.ratingAvg} + ' (' + ${s.reviewCount} + ')' : '—'">…</td>
+          <td><span class="badge" th:classappend="' ' + ${s.statusBadge}" th:text="${s.statusLabel}">…</span></td>
+          <td class="text-right"><a th:href="@{'/admin/stores/' + ${s.id}}" class="btn btn-ghost btn-sm">Mở</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <nav th:replace="~{fragments/pagination :: paging(${ds})}"></nav>
+</div>
+</body>
+</html>

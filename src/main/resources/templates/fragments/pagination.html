@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Phân trang. Dùng: <nav th:replace="~{fragments/pagination :: paging(${ds})}"></nav> -->
+<nav th:fragment="paging(p)" th:if="${p != null and p.hasPages()}"
+     class="mt-8 flex items-center justify-between gap-4 flex-wrap" aria-label="Phân trang">
+
+  <p class="text-[13px] text-muted">
+    Hiển thị <span class="tnum font-semibold text-ink" th:text="${p.firstItem}">1</span>–<span
+      class="tnum font-semibold text-ink" th:text="${p.lastItem}">20</span>
+    trong <span class="tnum" th:text="${p.total}">0</span> mục
+  </p>
+
+  <div class="flex items-center gap-1">
+    <a th:if="${!p.onFirstPage}" th:href="${p.previousPageUrl}" class="page-link" rel="prev">Trước</a>
+    <span th:if="${p.onFirstPage}" class="page-link opacity-40 pointer-events-none">Trước</span>
+
+    <th:block th:each="n : ${p.elements}">
+      <span th:if="${n == 0}" class="px-2 text-faint select-none">…</span>
+      <a th:if="${n != 0}" th:href="${p.url(n)}" th:text="${n}"
+         th:classappend="${n == p.currentPage} ? ' active' : ''"
+         class="page-link tnum">1</a>
+    </th:block>
+
+    <a th:if="${p.hasMorePages}" th:href="${p.nextPageUrl}" class="page-link" rel="next">Sau</a>
+    <span th:unless="${p.hasMorePages}" class="page-link opacity-40 pointer-events-none">Sau</span>
+  </div>
+</nav>
+
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin}">
+<head><title th:text="${p.name}">Sản phẩm</title></head>
+<body>
+<h1 layout:fragment="pageTitle" th:text="${p.name}">…</h1>
+<p layout:fragment="pageSubtitle"
+   th:text="'Mã ' + ${p.modelCode} + ' · ' + ${p.storeName} + ' · ' + ${p.brandName}">…</p>
+<div layout:fragment="pageActions">
+  <span class="badge" th:classappend="' ' + ${p.statusBadge}" th:text="${p.statusLabel}">…</span>
+</div>
+
+<div layout:fragment="content">
+  <a th:href="@{/admin/products}" class="text-sm text-muted hover:text-ink transition">← Danh sách sản phẩm</a>
+
+  <div class="grid lg:grid-cols-[1fr_340px] gap-6 mt-6 items-start">
+
+    <div class="space-y-6">
+      <!-- Ảnh -->
+      <div class="card p-6">
+        <p class="font-semibold mb-4">Ảnh
+          <span class="text-muted font-normal tnum" th:text="'(' + ${#lists.size(p.images)} + ')'">…</span>
+        </p>
+        <div th:if="${#lists.isEmpty(p.images)}" class="alert alert-error">
+          <svg th:replace="~{fragments/icons :: x('18')}"></svg>
+          <p>Sản phẩm chưa có ảnh nào.</p>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" th:unless="${#lists.isEmpty(p.images)}">
+          <div th:each="img : ${p.images}" class="tile aspect-square overflow-hidden relative"
+               th:classappend="${img.primaryImage} ? ' ring-2 ring-brand-500' : ''">
+            <img th:src="${img.url}" alt="" class="w-full h-full object-contain p-2">
+            <span th:if="${img.primaryImage}" class="absolute top-2 left-2 badge badge-brand">Đại diện</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Thông tin -->
+      <div class="card p-6">
+        <p class="font-semibold mb-4">Thông tin khai báo</p>
+        <dl class="grid sm:grid-cols-2 gap-x-6 gap-y-3.5 text-sm">
+          <div><dt class="text-muted mb-0.5">Danh mục</dt><dd th:text="${p.categoryName}">—</dd></div>
+          <div><dt class="text-muted mb-0.5">Đường dẫn</dt>
+            <dd><code class="text-[12px]" th:text="'/products/' + ${p.slug}">—</code></dd></div>
+          <div><dt class="text-muted mb-0.5">Giá bán</dt>
+            <dd class="tnum font-semibold" th:text="${#numbers.formatInteger(p.price, 0, 'POINT')} + '₫'">—</dd></div>
+          <div><dt class="text-muted mb-0.5">Giá khuyến mãi</dt>
+            <dd class="tnum" th:text="${p.promoPrice != null}
+                 ? ${#numbers.formatInteger(p.promoPrice, 0, 'POINT')} + '₫' : '—'">—</dd></div>
+          <div><dt class="text-muted mb-0.5">Khối lượng giặt</dt><dd th:text="${p.capacityLabel}">—</dd></div>
+          <div><dt class="text-muted mb-0.5">Kiểu cửa</dt><dd th:text="${p.doorTypeLabel}">—</dd></div>
+          <div><dt class="text-muted mb-0.5">Inverter</dt>
+            <dd th:text="${p.inverterMachine} ? 'Có' : 'Không'">—</dd></div>
+          <div><dt class="text-muted mb-0.5">Bảo hành</dt>
+            <dd class="tnum" th:text="${p.warrantyMonths} + ' tháng'">—</dd></div>
+          <div><dt class="text-muted mb-0.5">Tồn kho</dt>
+            <dd class="tnum" th:text="${p.sellableQuantity} + ' sản phẩm'">—</dd></div>
+          <div><dt class="text-muted mb-0.5">Nộp duyệt lúc</dt>
+            <dd class="tnum" th:text="${p.submittedAt != null}
+                 ? ${#temporals.format(p.submittedAt, 'HH:mm dd/MM/yyyy')} : '—'">—</dd></div>
+        </dl>
+
+        <div th:if="${p.highlights != null}" class="mt-5 pt-5 border-t border-line-soft">
+          <p class="text-muted text-sm mb-1">Điểm nổi bật</p>
+          <p class="text-sm leading-relaxed whitespace-pre-line" th:text="${p.highlights}">…</p>
+        </div>
+        <div th:if="${p.description != null}" class="mt-4">
+          <p class="text-muted text-sm mb-1">Mô tả</p>
+          <p class="text-sm leading-relaxed whitespace-pre-line" th:text="${p.description}">…</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thao tác -->
+    <div class="space-y-4 lg:sticky lg:top-24">
+
+      <div th:if="${p.rejectReason != null}" class="card p-5">
+        <p class="font-semibold mb-2">Ghi chú gần nhất</p>
+        <p class="text-sm text-muted leading-relaxed" th:text="${p.rejectReason}">…</p>
+      </div>
+
+      <a th:if="${p.store != null}" th:href="@{'/admin/stores/' + ${p.store.id}}"
+         class="btn btn-ghost btn-block">Xem gian hàng</a>
+
+      <th:block th:if="${p.awaitingReview}">
+        <form th:action="@{'/admin/products/' + ${p.id} + '/approve'}" method="post">
+          <button type="submit" class="btn btn-brand btn-block btn-lg">Duyệt, cho lên sàn</button>
+        </form>
+
+        <div class="card p-5">
+          <p class="font-semibold mb-3">Từ chối</p>
+          <form th:action="@{'/admin/products/' + ${p.id} + '/reject'}" method="post" class="space-y-3">
+            <textarea class="input" name="reason" rows="3" required
+                      placeholder="Nêu rõ cần sửa gì, ví dụ: ảnh mờ, thiếu thông số dung tích"></textarea>
+            <button type="submit" class="btn btn-danger btn-block">Từ chối</button>
+          </form>
+        </div>
+      </th:block>
+
+      <div th:if="${p.status == 'ACTIVE'}" class="card p-5">
+        <p class="font-semibold mb-1">Gỡ khỏi sàn</p>
+        <p class="text-[13px] text-muted mb-3">Dùng khi sản phẩm vi phạm quy định.</p>
+        <form th:action="@{'/admin/products/' + ${p.id} + '/suspend'}" method="post" class="space-y-3"
+              onsubmit="return confirm('Gỡ sản phẩm này khỏi sàn?');">
+          <input class="input" name="reason" placeholder="Lý do gỡ">
+          <button type="submit" class="btn btn-danger btn-block">Gỡ sản phẩm</button>
+        </form>
+      </div>
+
+      <form th:if="${p.status == 'SUSPENDED'}" th:action="@{'/admin/products/' + ${p.id} + '/restore'}"
+            method="post">
+        <button type="submit" class="btn btn-outline btn-block">Cho bán lại</button>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>

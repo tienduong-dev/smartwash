@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Thông báo flash + lỗi form chung. Đặt ngay đầu phần nội dung mỗi trang. -->
+<div th:fragment="alerts" class="space-y-3">
+
+  <div th:if="${success}" class="alert alert-success" role="status">
+    <svg th:replace="~{fragments/icons :: check('18')}"></svg>
+    <p th:text="${success}">…</p>
+  </div>
+
+  <div th:if="${error}" class="alert alert-error" role="alert">
+    <svg th:replace="~{fragments/icons :: x('18')}"></svg>
+    <p th:text="${error}">…</p>
+  </div>
+
+  <div th:if="${info}" class="alert alert-info" role="status">
+    <svg th:replace="~{fragments/icons :: info('18')}"></svg>
+    <p th:text="${info}">…</p>
+  </div>
+
+  <!-- Lỗi không gắn với ô nhập nào -->
+  <div th:if="${errors != null and errors.has('_')}" class="alert alert-error" role="alert">
+    <svg th:replace="~{fragments/icons :: x('18')}"></svg>
+    <p th:text="${errors.first('_')}">…</p>
+  </div>
+</div>
+
+<!-- Lỗi của một ô nhập: <p th:replace="~{fragments/alerts :: fieldError('email')}"></p> -->
+<p th:fragment="fieldError(ten)"
+   th:if="${errors != null and errors.has(ten)}"
+   class="form-error"
+   th:text="${errors.first(ten)}">…</p>
+
+<!-- Khung rỗng chuẩn (đặc tả mục 18, NAV-10) -->
+<div th:fragment="empty(tieuDe, moTa)" class="py-16 text-center">
+  <div class="mx-auto w-12 h-12 rounded-full bg-line-soft grid place-items-center text-faint mb-4">
+    <svg th:replace="~{fragments/icons :: box('22')}"></svg>
+  </div>
+  <p class="font-semibold" th:text="${tieuDe}">Chưa có dữ liệu</p>
+  <p class="mt-1 text-sm text-muted" th:text="${moTa}">…</p>
+</div>
+
+</body>
+</html>

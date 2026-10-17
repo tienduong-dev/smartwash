@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/app}">
+<head><title th:text="'Hồ sơ ' + ${hoSo.code}">Hồ sơ</title></head>
+<body>
+<div layout:fragment="content" class="mx-auto max-w-[1280px] px-6 lg:px-10 py-8">
+
+  <a th:href="@{/seller}" class="text-sm text-muted hover:text-ink transition">← Kênh người bán</a>
+
+  <div class="mt-3 flex items-start justify-between gap-4 flex-wrap">
+    <div>
+      <h1 class="text-[22px] font-bold tracking-[-0.025em]" th:text="${hoSo.storeName}">…</h1>
+      <p class="mt-1 text-sm text-muted">
+        Mã hồ sơ <span class="tnum font-medium text-ink" th:text="${hoSo.code}">…</span>
+        · nộp ngày <span class="tnum" th:text="${#temporals.format(hoSo.createdAt, 'dd/MM/yyyy')}">…</span>
+      </p>
+    </div>
+    <span class="badge" th:classappend="' ' + ${hoSo.statusBadge}" th:text="${hoSo.statusLabel}">…</span>
+  </div>
+
+  <!-- Tiến trình -->
+  <ol class="mt-8 flex items-center gap-2 text-[13px] overflow-x-auto scroll-thin pb-1">
+    <li class="flex items-center gap-2 shrink-0">
+      <span class="w-6 h-6 rounded-full bg-ink text-white grid place-items-center text-[11px] font-bold">1</span>
+      <span class="font-medium">Đã nộp</span>
+    </li>
+    <li class="w-8 h-px bg-line shrink-0"></li>
+    <li class="flex items-center gap-2 shrink-0">
+      <span class="w-6 h-6 rounded-full grid place-items-center text-[11px] font-bold"
+            th:classappend="${hoSo.status != 'PENDING'} ? ' bg-ink text-white' : ' bg-line-soft text-faint'">2</span>
+      <span th:classappend="${hoSo.status != 'PENDING'} ? ' font-medium' : ' text-faint'">Thẩm định</span>
+    </li>
+    <li class="w-8 h-px bg-line shrink-0"></li>
+    <li class="flex items-center gap-2 shrink-0">
+      <span class="w-6 h-6 rounded-full grid place-items-center text-[11px] font-bold"
+            th:classappend="${hoSo.status == 'APPROVED'} ? ' bg-brand-500 text-white' : (${hoSo.status == 'REJECTED'} ? ' bg-red-600 text-white' : ' bg-line-soft text-faint')">3</span>
+      <span th:classappend="${hoSo.status == 'APPROVED' or hoSo.status == 'REJECTED'} ? ' font-medium' : ' text-faint'">Kết quả</span>
+    </li>
+  </ol>
+
+  <!-- Phản hồi của quản trị viên -->
+  <div th:if="${hoSo.reviewNote != null}" class="mt-6 alert"
+       th:classappend="${hoSo.status == 'REJECTED'} ? ' alert-error' : (${hoSo.status == 'APPROVED'} ? ' alert-success' : ' alert-info')">
+    <svg th:replace="~{fragments/icons :: info('18')}"></svg>
+    <div>
+      <p class="font-semibold mb-0.5">Phản hồi từ quản trị viên</p>
+      <p th:text="${hoSo.reviewNote}">…</p>
+    </div>
+  </div>
+
+  <div th:if="${hoSo.createdStore != null}" class="mt-6 alert alert-success">
+    <svg th:replace="~{fragments/icons :: check('18')}"></svg>
+    <div class="flex items-center gap-4 flex-wrap">
+      <p>Gian hàng đã mở. Bạn có thể bắt đầu đăng sản phẩm.</p>
+      <a th:href="@{'/seller/' + ${hoSo.createdStore.id} + '/dashboard'}" class="btn btn-dark btn-sm">Vào gian hàng</a>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-[1fr_340px] gap-6 mt-6 items-start">
+
+    <!-- Giấy tờ -->
+    <div class="card p-6">
+      <div class="flex items-center justify-between gap-4 mb-4">
+        <p class="font-semibold">Giấy tờ đã nộp</p>
+        <span class="text-[13px] text-muted tnum"
+              th:text="${#lists.size(hoSo.documents)} + ' tệp'">0 tệp</span>
+      </div>
+
+      <div th:if="${#lists.isEmpty(hoSo.documents)}" class="py-8 text-center">
+        <p class="text-sm text-muted">Chưa có giấy tờ nào. Hãy tải lên ở khung bên phải.</p>
+      </div>
+
+      <ul class="divide-y divide-line-soft" th:unless="${#lists.isEmpty(hoSo.documents)}">
+        <li th:each="d : ${hoSo.documents}" class="py-3.5 flex items-center gap-3">
+          <span class="w-9 h-9 rounded-lg bg-line-soft grid place-items-center text-muted shrink-0">
+            <svg th:replace="~{fragments/icons :: file('17')}"></svg>
+          </span>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-medium truncate" th:text="${d.typeLabel}">…</p>
+            <p class="text-[12px] text-faint truncate">
+              <span th:text="${d.originalName}">…</span>
+              <span th:if="${d.sizeLabel != ''}" class="tnum" th:text="' · ' + ${d.sizeLabel}">…</span>
+            </p>
+            <p th:if="${d.note != null}" class="text-[12px] text-muted mt-0.5" th:text="${d.note}">…</p>
+          </div>
+          <span class="badge shrink-0" th:classappend="' ' + ${d.statusBadge}" th:text="${d.statusLabel}">…</span>
+          <a th:href="@{'/seller/documents/' + ${d.id}}" target="_blank" rel="noopener"
+             class="btn btn-ghost btn-sm shrink-0">Xem</a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Thông tin + tải giấy tờ -->
+    <div class="space-y-4 lg:sticky lg:top-24">
+
+      <div class="card p-5">
+        <p class="font-semibold mb-3">Thông tin hồ sơ</p>
+        <dl class="space-y-2.5 text-sm">
+          <div class="flex gap-3"><dt class="text-muted w-28 shrink-0">Thương hiệu</dt>
+            <dd class="font-medium" th:text="${hoSo.brandDisplay}">…</dd></div>
+          <div class="flex gap-3"><dt class="text-muted w-28 shrink-0">Loại hình</dt>
+            <dd th:text="${hoSo.storeTypeLabel}">…</dd></div>
+          <div class="flex gap-3" th:if="${hoSo.contactPhone != null}"><dt class="text-muted w-28 shrink-0">Điện thoại</dt>
+            <dd class="tnum" th:text="${hoSo.contactPhone}">…</dd></div>
+          <div class="flex gap-3" th:if="${hoSo.contactEmail != null}"><dt class="text-muted w-28 shrink-0">Email</dt>
+            <dd class="truncate" th:text="${hoSo.contactEmail}">…</dd></div>
+          <div class="flex gap-3" th:if="${hoSo.pickupAddress != null}"><dt class="text-muted w-28 shrink-0">Lấy hàng</dt>
+            <dd th:text="${hoSo.pickupAddress}">…</dd></div>
+        </dl>
+      </div>
+
+      <div class="card p-5" th:if="${hoSo.canSupplement()}">
+        <p class="font-semibold mb-3">Tải giấy tờ</p>
+        <form th:action="@{'/seller/registration/' + ${hoSo.id} + '/documents'}" method="post"
+              enctype="multipart/form-data" class="space-y-3">
+          <div>
+            <label class="label" for="documentType">Loại giấy tờ</label>
+            <select class="select" id="documentType" name="documentType" required>
+              <option value="BUSINESS_LICENSE">Giấy phép kinh doanh</option>
+              <option value="AUTHORIZATION_LETTER">Thư uỷ quyền thương hiệu</option>
+              <option value="DISTRIBUTION_CONTRACT">Hợp đồng phân phối</option>
+              <option value="ID_CARD">Giấy tờ tuỳ thân người đại diện</option>
+              <option value="OTHER">Tài liệu khác</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="file">Tệp</label>
+            <input class="input" type="file" id="file" name="file" required accept="image/*,application/pdf">
+            <p class="form-hint">Ảnh hoặc PDF, tối đa 10 MB.</p>
+          </div>
+          <button type="submit" class="btn btn-dark btn-block">Tải lên</button>
+        </form>
+      </div>
+
+      <form th:if="${hoSo.canCancel()}" th:action="@{'/seller/registration/' + ${hoSo.id} + '/cancel'}"
+            method="post" onsubmit="return confirm('Huỷ hồ sơ này? Bạn sẽ phải nộp lại từ đầu.');">
+        <button type="submit" class="btn btn-ghost btn-block text-red-600">Huỷ hồ sơ</button>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>

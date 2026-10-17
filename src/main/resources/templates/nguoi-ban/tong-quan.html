@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/seller}">
+<head><title>Tổng quan</title></head>
+<body>
+<h1 layout:fragment="pageTitle" th:text="${store.name}">Gian hàng</h1>
+<p layout:fragment="pageSubtitle" th:text="${store.brandName} + ' · ' + ${store.storeTypeLabel}">…</p>
+
+<div layout:fragment="content">
+
+  <!-- Cảnh báo trạng thái -->
+  <div th:if="${store.status == 'SUSPENDED'}" class="alert alert-error mb-6">
+    <svg th:replace="~{fragments/icons :: x('18')}"></svg>
+    <div>
+      <p class="font-semibold mb-0.5">Gian hàng đang tạm ngưng</p>
+      <p th:text="${store.suspendedReason}">…</p>
+    </div>
+  </div>
+
+  <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div class="stat">
+      <p class="stat-label">Trạng thái</p>
+      <p class="stat-value text-[20px]" th:text="${store.statusLabel}">…</p>
+    </div>
+    <div class="stat">
+      <p class="stat-label">Thương hiệu</p>
+      <p class="stat-value text-[20px]" th:text="${store.brandName}">…</p>
+    </div>
+    <div class="stat">
+      <p class="stat-label">Đánh giá</p>
+      <p class="stat-value tnum" th:text="${store.hasReviews()} ? ${store.ratingAvg} : '—'">—</p>
+      <p class="text-[13px] text-muted mt-0.5 tnum" th:text="${store.reviewCount} + ' lượt'">0 lượt</p>
+    </div>
+    <div class="stat">
+      <p class="stat-label">Nhân sự</p>
+      <p class="stat-value tnum" th:text="${#lists.size(nhanSu)}">0</p>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-6 mt-6">
+
+    <div class="card p-6">
+      <p class="font-semibold">Việc tiếp theo</p>
+      <ul class="mt-4 space-y-3 text-sm">
+        <li class="flex items-start gap-3">
+          <span class="w-5 h-5 rounded-full bg-line-soft text-faint grid place-items-center text-[11px] shrink-0 mt-0.5">1</span>
+          <div>
+            <p class="font-medium">Hoàn thiện thông tin gian hàng</p>
+            <p class="text-muted">Logo, mô tả và chính sách đổi trả giúp khách tin tưởng hơn.</p>
+            <a th:href="@{'/seller/' + ${store.id} + '/profile'}"
+               class="link-underline text-ink font-medium">Cập nhật ngay</a>
+          </div>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="w-5 h-5 rounded-full bg-line-soft text-faint grid place-items-center text-[11px] shrink-0 mt-0.5">2</span>
+          <div>
+            <p class="font-medium">Thêm nhân sự</p>
+            <p class="text-muted">Phân quyền cho đồng nghiệp xử lý đơn và chăm sóc khách.</p>
+            <a th:href="@{'/seller/' + ${store.id} + '/members'}"
+               class="link-underline text-ink font-medium">Quản lý nhân sự</a>
+          </div>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="w-5 h-5 rounded-full bg-line-soft text-faint grid place-items-center text-[11px] shrink-0 mt-0.5">3</span>
+          <div>
+            <p class="font-medium">Đăng sản phẩm</p>
+            <p class="text-muted">
+              Sản phẩm phải thuộc thương hiệu <span class="font-medium text-ink" th:text="${store.brandName}">…</span>.
+              Chức năng này mở ở bước tiếp theo của dự án.
+            </p>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="card p-6">
+      <p class="font-semibold">Thông tin gian hàng</p>
+      <dl class="mt-4 space-y-2.5 text-sm">
+        <div class="flex gap-3"><dt class="text-muted w-32 shrink-0">Đường dẫn</dt>
+          <dd class="truncate"><code class="text-[13px]" th:text="'/stores/' + ${store.slug}">…</code></dd></div>
+        <div class="flex gap-3"><dt class="text-muted w-32 shrink-0">Loại hình</dt>
+          <dd th:text="${store.storeTypeLabel}">…</dd></div>
+        <div class="flex gap-3" th:if="${store.phone != null}"><dt class="text-muted w-32 shrink-0">Điện thoại</dt>
+          <dd class="tnum" th:text="${store.phone}">…</dd></div>
+        <div class="flex gap-3" th:if="${store.pickupAddress != null}"><dt class="text-muted w-32 shrink-0">Địa chỉ lấy hàng</dt>
+          <dd th:text="${store.pickupAddress}">…</dd></div>
+        <div class="flex gap-3"><dt class="text-muted w-32 shrink-0">Phí sàn</dt>
+          <dd th:text="${store.commissionRate != null} ? ${store.commissionRate} + '%' : 'Theo mức chung của sàn'">…</dd></div>
+        <div class="flex gap-3" th:if="${store.approvedAt != null}"><dt class="text-muted w-32 shrink-0">Ngày duyệt</dt>
+          <dd class="tnum" th:text="${#temporals.format(store.approvedAt, 'dd/MM/yyyy')}">…</dd></div>
+      </dl>
+    </div>
+  </div>
+</div>
+</body>
+</html>

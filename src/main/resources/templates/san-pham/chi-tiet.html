@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/app}">
+<head><title th:text="${p.name}">Sản phẩm</title></head>
+<body>
+<div layout:fragment="content" class="mx-auto max-w-[1280px] px-6 lg:px-10 py-8">
+
+  <div th:if="${xemThu}" class="alert alert-info mb-6">
+    <svg th:replace="~{fragments/icons :: info('18')}"></svg>
+    <p>Bạn đang xem thử. Sản phẩm này đang ở trạng thái
+      <strong th:text="${p.statusLabel}">…</strong> nên khách hàng chưa nhìn thấy.</p>
+  </div>
+
+  <!-- Đường dẫn -->
+  <nav class="text-[13px] text-muted mb-6 flex items-center gap-2 flex-wrap" aria-label="Đường dẫn">
+    <a th:href="@{/}" class="hover:text-ink transition">Trang chủ</a>
+    <span class="text-line">/</span>
+    <a th:href="@{/products}" class="hover:text-ink transition">Sản phẩm</a>
+    <th:block th:if="${p.category != null}">
+      <span class="text-line">/</span>
+      <a th:href="@{/products(categoryId=${p.category.id})}" class="hover:text-ink transition"
+         th:text="${p.categoryName}">Danh mục</a>
+    </th:block>
+  </nav>
+
+  <div class="grid lg:grid-cols-[1.05fr_1fr] gap-10 lg:gap-14 items-start">
+
+    <!-- ============================== ẢNH ============================== -->
+    <div>
+      <div class="tile aspect-square overflow-hidden">
+        <img id="anh-chinh" th:src="${p.imageUrl}" th:alt="${p.name}"
+             class="w-full h-full object-contain p-10">
+      </div>
+
+      <div th:if="${#lists.size(p.images) > 1}" class="mt-3 grid grid-cols-5 gap-2.5">
+        <button th:each="img : ${p.images}" type="button"
+                class="tile aspect-square overflow-hidden p-0 border border-line hover:border-ink transition"
+                th:attr="data-src=${img.url}"
+                onclick="document.getElementById('anh-chinh').src = this.getAttribute('data-src')">
+          <img th:src="${img.url}" alt="" class="w-full h-full object-contain p-2" loading="lazy">
+        </button>
+      </div>
+    </div>
+
+    <!-- ============================ THÔNG TIN ============================ -->
+    <div>
+      <div class="flex items-center gap-2 flex-wrap mb-3">
+        <span class="badge badge-neutral" th:text="${p.brandName}">Thương hiệu</span>
+        <span th:if="${p.store != null and p.store.official}" class="badge badge-dark">Gian hàng chính hãng</span>
+        <span th:if="${p.onSale}" class="badge badge-brand" th:text="'-' + ${p.discountPercent} + '%'">-10%</span>
+      </div>
+
+      <h1 class="text-[28px] font-bold tracking-[-0.03em] leading-tight" th:text="${p.name}">Tên sản phẩm</h1>
+      <p class="mt-2 text-sm text-muted">
+        Mã model <span class="tnum font-medium text-ink" th:text="${p.modelCode}">—</span>
+        <span th:if="${p.hasReviews()}" class="tnum"
+              th:text="' · ' + ${p.ratingAvg} + '/5 từ ' + ${p.reviewCount} + ' đánh giá'"></span>
+      </p>
+
+      <!-- Giá -->
+      <div class="mt-6 flex items-end gap-3">
+        <p class="text-[32px] font-bold tnum tracking-tight"
+           th:text="${#numbers.formatInteger(p.effectivePrice, 0, 'POINT')} + '₫'">0₫</p>
+        <p th:if="${p.compareAtPrice != null}" class="text-[17px] text-faint line-through tnum mb-1.5"
+           th:text="${#numbers.formatInteger(p.compareAtPrice, 0, 'POINT')} + '₫'">0₫</p>
+      </div>
+      <p th:if="${p.promoRunning and p.promoEndAt != null}" class="mt-1 text-[13px] text-brand-500 font-medium">
+        Khuyến mãi đến <span class="tnum" th:text="${#temporals.format(p.promoEndAt, 'HH:mm dd/MM/yyyy')}">…</span>
+      </p>
+
+      <!-- Thông số nổi bật -->
+      <dl class="mt-7 grid grid-cols-2 sm:grid-cols-4 gap-4 py-5 border-y border-line">
+        <div>
+          <dt class="text-[12px] text-faint">Khối lượng giặt</dt>
+          <dd class="font-semibold tnum mt-0.5" th:text="${p.capacityLabel}">—</dd>
+        </div>
+        <div>
+          <dt class="text-[12px] text-faint">Kiểu cửa</dt>
+          <dd class="font-semibold mt-0.5" th:text="${p.doorTypeLabel}">—</dd>
+        </div>
+        <div>
+          <dt class="text-[12px] text-faint">Tốc độ vắt</dt>
+          <dd class="font-semibold tnum mt-0.5"
+              th:text="${p.spinSpeedRpm != null} ? ${p.spinSpeedRpm} + ' v/p' : '—'">—</dd>
+        </div>
+        <div>
+          <dt class="text-[12px] text-faint">Bảo hành</dt>
+          <dd class="font-semibold tnum mt-0.5" th:text="${p.warrantyMonths} + ' tháng'">—</dd>
+        </div>
+      </dl>
+
+      <!-- Tồn kho + mua -->
+      <div class="mt-6">
+        <p th:if="${p.inStock}" class="text-sm text-muted mb-3">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1.5"></span>
+          Còn hàng
+          <span th:if="${p.sellableQuantity <= 5}" class="text-brand-500 font-medium tnum"
+                th:text="'— chỉ còn ' + ${p.sellableQuantity} + ' sản phẩm'"></span>
+        </p>
+        <p th:unless="${p.inStock}" class="text-sm text-muted mb-3">
+          <span class="inline-block w-2 h-2 rounded-full bg-zinc-400 mr-1.5"></span>
+          Tạm hết hàng
+        </p>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <form th:action="@{'/cart/' + ${p.id}}" method="post" class="flex-1 min-w-[200px]">
+            <button type="submit" class="btn btn-dark btn-lg btn-block"
+                    th:disabled="${!p.sellable or !p.inStock}">
+              <svg th:replace="~{fragments/icons :: bag('18')}"></svg>
+              Thêm vào giỏ
+            </button>
+          </form>
+
+          <form th:action="@{'/wishlist/' + ${p.id}}" method="post">
+            <input type="hidden" name="next" th:value="'/products/' + ${p.slug}">
+            <button type="submit" class="btn btn-outline btn-lg"
+                    th:text="${daThich} ? 'Bỏ yêu thích' : 'Yêu thích'">Yêu thích</button>
+          </form>
+        </div>
+        <p class="form-hint">Chức năng giỏ hàng và đặt hàng thuộc giai đoạn tiếp theo của dự án.</p>
+      </div>
+
+      <!-- Gian hàng bán -->
+      <div th:if="${p.store != null}" class="mt-7 card p-5">
+        <div class="flex items-center gap-3.5">
+          <img th:src="${p.store.logoUrl}" alt="" class="w-12 h-12 rounded-xl object-cover bg-line-soft shrink-0">
+          <div class="min-w-0 flex-1">
+            <p class="text-[12px] text-faint">Bán bởi</p>
+            <a th:href="@{'/stores/' + ${p.store.slug}}" class="font-semibold link-underline block truncate"
+               th:text="${p.store.name}">…</a>
+            <p class="text-[12px] text-muted" th:text="${p.store.storeTypeLabel}">…</p>
+          </div>
+          <a th:href="@{'/stores/' + ${p.store.slug}}" class="btn btn-ghost btn-sm shrink-0">Xem gian hàng</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================== MÔ TẢ, THÔNG SỐ, CHÍNH SÁCH ====================== -->
+  <div class="grid lg:grid-cols-[1.4fr_1fr] gap-10 mt-16">
+
+    <div class="space-y-10">
+      <section th:if="${p.highlights != null}">
+        <h2 class="text-[17px] font-bold tracking-[-0.02em] mb-3">Điểm nổi bật</h2>
+        <div class="text-[15px] leading-relaxed text-muted whitespace-pre-line" th:text="${p.highlights}">…</div>
+      </section>
+
+      <section th:if="${p.description != null}">
+        <h2 class="text-[17px] font-bold tracking-[-0.02em] mb-3">Mô tả sản phẩm</h2>
+        <div class="text-[15px] leading-relaxed text-muted whitespace-pre-line" th:text="${p.description}">…</div>
+      </section>
+
+      <section>
+        <h2 class="text-[17px] font-bold tracking-[-0.02em] mb-3">Thông số kỹ thuật</h2>
+        <div class="card overflow-hidden">
+          <table class="table">
+            <tbody>
+              <tr><th class="w-52 font-medium text-muted">Thương hiệu</th><td th:text="${p.brandName}">—</td></tr>
+              <tr><th class="font-medium text-muted">Mã model</th><td class="tnum" th:text="${p.modelCode}">—</td></tr>
+              <tr><th class="font-medium text-muted">Khối lượng giặt</th><td th:text="${p.capacityLabel}">—</td></tr>
+              <tr><th class="font-medium text-muted">Kiểu cửa</th><td th:text="${p.doorTypeLabel}">—</td></tr>
+              <tr th:if="${p.spinSpeedRpm != null}"><th class="font-medium text-muted">Tốc độ vắt</th>
+                  <td class="tnum" th:text="${p.spinSpeedRpm} + ' vòng/phút'">—</td></tr>
+              <tr><th class="font-medium text-muted">Công nghệ Inverter</th>
+                  <td th:text="${p.inverterMachine} ? 'Có' : 'Không'">—</td></tr>
+              <tr th:if="${p.energyRating != null}"><th class="font-medium text-muted">Nhãn năng lượng</th>
+                  <td th:text="${p.energyRating}">—</td></tr>
+              <tr th:if="${p.dimensionLabel != null}"><th class="font-medium text-muted">Kích thước (R×C×S)</th>
+                  <td class="tnum" th:text="${p.dimensionLabel}">—</td></tr>
+              <tr th:if="${p.weightKg != null}"><th class="font-medium text-muted">Khối lượng máy</th>
+                  <td class="tnum" th:text="${p.weightKg} + ' kg'">—</td></tr>
+              <tr th:if="${p.powerKwhYear != null}"><th class="font-medium text-muted">Điện năng tiêu thụ</th>
+                  <td class="tnum" th:text="${p.powerKwhYear} + ' kWh/năm'">—</td></tr>
+              <tr th:if="${p.waterLiterCycle != null}"><th class="font-medium text-muted">Nước tiêu thụ</th>
+                  <td class="tnum" th:text="${p.waterLiterCycle} + ' lít/lần giặt'">—</td></tr>
+              <tr><th class="font-medium text-muted">Bảo hành</th>
+                  <td class="tnum" th:text="${p.warrantyMonths} + ' tháng'">—</td></tr>
+              <tr th:each="s : ${p.specs}">
+                <th class="font-medium text-muted" th:text="${s.key}">—</th>
+                <td th:text="${s.value}">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <aside th:if="${p.store != null}" class="space-y-5">
+      <div th:if="${p.store.warrantyPolicy != null}" class="panel p-5">
+        <p class="font-semibold mb-2">Chính sách bảo hành</p>
+        <p class="text-sm text-muted leading-relaxed" th:text="${p.store.warrantyPolicy}">…</p>
+      </div>
+      <div th:if="${p.store.returnPolicy != null}" class="panel p-5">
+        <p class="font-semibold mb-2">Chính sách đổi trả</p>
+        <p class="text-sm text-muted leading-relaxed" th:text="${p.store.returnPolicy}">…</p>
+      </div>
+      <div th:if="${p.store.shippingPolicy != null}" class="panel p-5">
+        <p class="font-semibold mb-2">Giao hàng</p>
+        <p class="text-sm text-muted leading-relaxed" th:text="${p.store.shippingPolicy}">…</p>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ============================ GỢI Ý THÊM ============================ -->
+  <section th:if="${!#lists.isEmpty(lienQuan)}" class="mt-16">
+    <h2 class="text-[17px] font-bold tracking-[-0.02em] mb-5">Sản phẩm cùng danh mục</h2>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-x-5 gap-y-9">
+      <article th:each="x : ${lienQuan}" th:replace="~{fragments/san-pham :: the(${x})}"></article>
+    </div>
+  </section>
+</div>
+</body>
+</html>

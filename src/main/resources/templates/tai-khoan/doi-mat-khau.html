@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/app}">
+<head><title>Đổi mật khẩu</title></head>
+<body>
+<div layout:fragment="content" class="mx-auto max-w-[1280px] px-6 lg:px-10 py-8">
+  <div class="max-w-lg">
+    <h1 class="text-[22px] font-bold tracking-[-0.025em]">Đổi mật khẩu</h1>
+    <p class="mt-1 text-sm text-muted">Sau khi đổi, các thiết bị khác vẫn đăng nhập cho tới khi hết phiên.</p>
+
+    <div class="card p-6 mt-6">
+      <form th:action="@{/account/password}" method="post" class="space-y-4">
+        <div>
+          <label class="label" for="currentPassword">Mật khẩu hiện tại</label>
+          <input class="input" type="password" id="currentPassword" name="currentPassword" required
+                 autocomplete="current-password">
+          <p th:replace="~{fragments/alerts :: fieldError('currentPassword')}"></p>
+        </div>
+        <div>
+          <label class="label" for="newPassword">Mật khẩu mới</label>
+          <input class="input" type="password" id="newPassword" name="newPassword" required
+                 autocomplete="new-password">
+          <p class="form-hint">Ít nhất 8 ký tự.</p>
+          <p th:replace="~{fragments/alerts :: fieldError('newPassword')}"></p>
+        </div>
+        <div>
+          <label class="label" for="newPasswordConfirm">Nhập lại mật khẩu mới</label>
+          <input class="input" type="password" id="newPasswordConfirm" name="newPasswordConfirm" required
+                 autocomplete="new-password">
+          <p th:replace="~{fragments/alerts :: fieldError('newPasswordConfirm')}"></p>
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button type="submit" class="btn btn-dark">Đổi mật khẩu</button>
+          <a th:href="@{/account}" class="btn btn-ghost">Huỷ</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>

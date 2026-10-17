@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin}">
+<head><title th:text="${store.name}">Gian hàng</title></head>
+<body>
+<h1 layout:fragment="pageTitle" th:text="${store.name}">…</h1>
+<p layout:fragment="pageSubtitle" th:text="${store.brandName} + ' · ' + ${store.storeTypeLabel}">…</p>
+<div layout:fragment="pageActions">
+  <span class="badge" th:classappend="' ' + ${store.statusBadge}" th:text="${store.statusLabel}">…</span>
+</div>
+
+<div layout:fragment="content">
+  <a th:href="@{/admin/stores}" class="text-sm text-muted hover:text-ink transition">← Danh sách gian hàng</a>
+
+  <div th:if="${store.status == 'SUSPENDED'}" class="alert alert-error mt-5">
+    <svg th:replace="~{fragments/icons :: x('18')}"></svg>
+    <div>
+      <p class="font-semibold mb-0.5">Đang tạm ngưng
+        <span th:if="${store.suspendedAt != null}" class="font-normal tnum"
+              th:text="'từ ' + ${#temporals.format(store.suspendedAt, 'dd/MM/yyyy')}">…</span>
+      </p>
+      <p th:text="${store.suspendedReason}">…</p>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-[1fr_320px] gap-6 mt-6 items-start">
+
+    <div class="space-y-6">
+      <div class="card p-6">
+        <p class="font-semibold mb-4">Thông tin gian hàng</p>
+        <dl class="grid sm:grid-cols-2 gap-x-6 gap-y-3.5 text-sm">
+          <div><dt class="text-muted mb-0.5">Đường dẫn</dt>
+            <dd><code class="text-[13px]" th:text="'/stores/' + ${store.slug}">…</code></dd></div>
+          <div><dt class="text-muted mb-0.5">Thương hiệu</dt>
+            <dd><a th:href="@{'/admin/brands/' + ${store.brand.id}}" class="link-underline font-medium"
+                   th:text="${store.brandName}">…</a></dd></div>
+          <div><dt class="text-muted mb-0.5">Doanh nghiệp</dt>
+            <dd th:text="${store.business != null ? store.business.legalName : '—'}">…</dd></div>
+          <div><dt class="text-muted mb-0.5">Mã số thuế</dt>
+            <dd class="tnum" th:text="${store.business != null and store.business.taxCode != null ? store.business.taxCode : '—'}">…</dd></div>
+          <div><dt class="text-muted mb-0.5">Điện thoại</dt><dd class="tnum" th:text="${store.phone ?: '—'}">…</dd></div>
+          <div><dt class="text-muted mb-0.5">Email</dt><dd th:text="${store.email ?: '—'}">…</dd></div>
+          <div class="sm:col-span-2"><dt class="text-muted mb-0.5">Địa chỉ lấy hàng</dt>
+            <dd th:text="${store.pickupAddress ?: '—'}">…</dd></div>
+          <div><dt class="text-muted mb-0.5">Phí sàn</dt>
+            <dd th:text="${store.commissionRate != null} ? ${store.commissionRate} + '%' : 'Theo mức chung'">…</dd></div>
+          <div><dt class="text-muted mb-0.5">Ngày duyệt</dt>
+            <dd class="tnum" th:text="${store.approvedAt != null} ? ${#temporals.format(store.approvedAt, 'dd/MM/yyyy')} : '—'">…</dd></div>
+        </dl>
+      </div>
+
+      <div class="card p-6">
+        <p class="font-semibold mb-4">Nhân sự
+          <span class="text-muted font-normal tnum" th:text="'(' + ${#lists.size(nhanSu)} + ')'">…</span>
+        </p>
+        <ul class="divide-y divide-line-soft">
+          <li th:each="m : ${nhanSu}" class="py-3 flex items-center gap-3">
+            <span class="w-9 h-9 rounded-full bg-ink text-white text-xs font-bold grid place-items-center shrink-0"
+                  th:text="${m.user.initial}">A</span>
+            <div class="min-w-0 flex-1">
+              <a th:href="@{'/admin/users/' + ${m.user.id}}" class="font-medium link-underline block truncate"
+                 th:text="${m.user.fullName}">…</a>
+              <p class="text-[12px] text-faint truncate" th:text="${m.user.email}">…</p>
+            </div>
+            <span class="text-[13px] text-muted hidden sm:block" th:text="${m.permissionSummary}">…</span>
+            <span class="badge shrink-0" th:classappend="${m.owner} ? ' badge-dark' : ' badge-neutral'"
+                  th:text="${m.roleLabel}">…</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="space-y-4 lg:sticky lg:top-24">
+      <div th:if="${store.status == 'ACTIVE'}" class="card p-5">
+        <p class="font-semibold mb-1">Tạm ngưng gian hàng</p>
+        <p class="text-[13px] text-muted mb-3">
+          Sản phẩm ẩn khỏi tìm kiếm và không nhận đơn mới. Đơn đang chạy vẫn phải hoàn tất.
+        </p>
+        <form th:action="@{'/admin/stores/' + ${store.id} + '/suspend'}" method="post" class="space-y-3">
+          <textarea class="input" name="reason" rows="2" required placeholder="Lý do tạm ngưng"></textarea>
+          <button type="submit" class="btn btn-danger btn-block">Tạm ngưng</button>
+        </form>
+      </div>
+
+      <form th:if="${store.status == 'SUSPENDED'}" th:action="@{'/admin/stores/' + ${store.id} + '/reactivate'}"
+            method="post">
+        <button type="submit" class="btn btn-brand btn-block">Cho hoạt động trở lại</button>
+      </form>
+
+      <div th:if="${store.status != 'CLOSED'}" class="card p-5">
+        <p class="font-semibold mb-1">Đóng gian hàng</p>
+        <p class="text-[13px] text-muted mb-3">Không mở lại được. Chỉ dùng khi gian hàng ngừng kinh doanh hẳn.</p>
+        <form th:action="@{'/admin/stores/' + ${store.id} + '/close'}" method="post" class="space-y-3"
+              onsubmit="return confirm('Đóng hẳn gian hàng này? Thao tác không hoàn tác được.');">
+          <input class="input" name="reason" placeholder="Lý do">
+          <button type="submit" class="btn btn-ghost btn-block text-red-600">Đóng gian hàng</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

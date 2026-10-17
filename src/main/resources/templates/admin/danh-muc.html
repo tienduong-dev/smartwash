@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin}">
+<head><title>Danh mục</title></head>
+<body>
+<h1 layout:fragment="pageTitle">Danh mục sản phẩm</h1>
+<p layout:fragment="pageSubtitle">Cây danh mục khách dùng để duyệt và lọc hàng</p>
+
+<div layout:fragment="content">
+  <div class="grid lg:grid-cols-[1fr_320px] gap-6 items-start">
+
+    <!-- Cây danh mục -->
+    <div class="card overflow-hidden">
+      <div th:if="${#lists.isEmpty(cay)}">
+        <div th:replace="~{fragments/alerts :: empty('Chưa có danh mục nào', 'Thêm danh mục đầu tiên ở khung bên phải.')}"></div>
+      </div>
+
+      <table class="table" th:unless="${#lists.isEmpty(cay)}">
+        <thead>
+          <tr><th>Danh mục</th><th>Đường dẫn</th><th>Sản phẩm</th><th>Thứ tự</th><th>Trạng thái</th><th></th></tr>
+        </thead>
+        <tbody>
+          <th:block th:each="c : ${cay}">
+            <!-- Danh mục gốc -->
+            <tr>
+              <td>
+                <div class="flex items-center gap-3">
+                  <img th:if="${c.imageUrl != null}" th:src="${c.imageUrl}" alt=""
+                       class="w-9 h-9 rounded-lg object-cover bg-line-soft shrink-0">
+                  <span th:unless="${c.imageUrl != null}"
+                        class="w-9 h-9 rounded-lg bg-line-soft grid place-items-center text-faint shrink-0">
+                    <svg th:replace="~{fragments/icons :: box('16')}"></svg>
+                  </span>
+                  <span class="font-semibold" th:text="${c.name}">…</span>
+                </div>
+              </td>
+              <td><code class="text-[12px] text-faint" th:text="'/' + ${c.slug}">…</code></td>
+              <td class="tnum text-muted" th:text="${c.productCount}">0</td>
+              <td class="tnum text-muted" th:text="${c.sortOrder}">0</td>
+              <td><span class="badge" th:classappend="' ' + ${c.statusBadge}" th:text="${c.statusLabel}">…</span></td>
+              <td class="text-right whitespace-nowrap">
+                <details class="inline-block text-left">
+                  <summary class="btn btn-ghost btn-sm cursor-pointer list-none">Sửa</summary>
+                  <div class="card p-4 mt-2 w-80 absolute right-8 z-10 shadow-[0_12px_40px_-12px_rgb(0_0_0/0.2)]">
+                    <form th:action="@{'/admin/categories/' + ${c.id}}" method="post"
+                          enctype="multipart/form-data" class="space-y-3">
+                      <div>
+                        <label class="label">Tên</label>
+                        <input class="input" name="name" th:value="${c.name}" required>
+                      </div>
+                      <div>
+                        <label class="label">Danh mục cha</label>
+                        <select class="select" name="parentId">
+                          <option value="">— Danh mục gốc —</option>
+                          <option th:each="x : ${choChon}" th:value="${x.id}"
+                                  th:text="${x.parent != null} ? '— ' + ${x.name} : ${x.name}"
+                                  th:selected="${c.parent != null and c.parent.id == x.id}"
+                                  th:disabled="${x.id == c.id}">…</option>
+                        </select>
+                      </div>
+                      <div class="grid grid-cols-2 gap-2">
+                        <div>
+                          <label class="label">Thứ tự</label>
+                          <input class="input tnum" name="sortOrder" th:value="${c.sortOrder}">
+                        </div>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer mt-7">
+                          <input type="checkbox" name="active" value="true" class="w-4 h-4 accent-black"
+                                 th:checked="${c.active}"> Hiện
+                        </label>
+                      </div>
+                      <div>
+                        <label class="label">Ảnh</label>
+                        <input class="input" type="file" name="image" accept="image/*">
+                      </div>
+                      <button type="submit" class="btn btn-dark btn-sm btn-block">Lưu</button>
+                    </form>
+                  </div>
+                </details>
+
+                <form th:action="@{'/admin/categories/' + ${c.id} + '/delete'}" method="post"
+                      class="inline-block" onsubmit="return confirm('Xoá danh mục này?');">
+                  <button type="submit" class="btn btn-ghost btn-sm text-red-600">Xoá</button>
+                </form>
+              </td>
+            </tr>
+
+            <!-- Danh mục con -->
+            <tr th:each="con : ${c.children}">
+              <td>
+                <div class="flex items-center gap-3 pl-8">
+                  <span class="text-faint">└</span>
+                  <span th:text="${con.name}">…</span>
+                </div>
+              </td>
+              <td><code class="text-[12px] text-faint" th:text="'/' + ${con.slug}">…</code></td>
+              <td class="tnum text-muted" th:text="${con.productCount}">0</td>
+              <td class="tnum text-muted" th:text="${con.sortOrder}">0</td>
+              <td><span class="badge" th:classappend="' ' + ${con.statusBadge}" th:text="${con.statusLabel}">…</span></td>
+              <td class="text-right whitespace-nowrap">
+                <form th:action="@{'/admin/categories/' + ${con.id} + '/visibility'}" method="post"
+                      class="inline-block">
+                  <input type="hidden" name="active" th:value="${!con.active}">
+                  <button type="submit" class="btn btn-ghost btn-sm"
+                          th:text="${con.active} ? 'Ẩn' : 'Hiện'">Ẩn</button>
+                </form>
+                <form th:action="@{'/admin/categories/' + ${con.id} + '/delete'}" method="post"
+                      class="inline-block" onsubmit="return confirm('Xoá danh mục này?');">
+                  <button type="submit" class="btn btn-ghost btn-sm text-red-600">Xoá</button>
+                </form>
+              </td>
+            </tr>
+          </th:block>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Thêm mới -->
+    <div class="card p-5 lg:sticky lg:top-24">
+      <p class="font-semibold mb-1">Thêm danh mục</p>
+      <p class="text-[13px] text-muted mb-4">Để trống danh mục cha nếu đây là danh mục gốc.</p>
+
+      <form th:action="@{/admin/categories}" method="post" enctype="multipart/form-data" class="space-y-3.5">
+        <div>
+          <label class="label" for="name">Tên danh mục</label>
+          <input class="input" id="name" name="name" required placeholder="Máy giặt cửa ngang">
+        </div>
+        <div>
+          <label class="label" for="parentId">Danh mục cha</label>
+          <select class="select" id="parentId" name="parentId">
+            <option value="">— Danh mục gốc —</option>
+            <option th:each="x : ${choChon}" th:value="${x.id}"
+                    th:text="${x.parent != null} ? '— ' + ${x.name} : ${x.name}">…</option>
+          </select>
+        </div>
+        <div>
+          <label class="label" for="description">Mô tả</label>
+          <textarea class="input" id="description" name="description" rows="2"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="label" for="sortOrder">Thứ tự</label>
+            <input class="input tnum" id="sortOrder" name="sortOrder" value="0">
+          </div>
+          <label class="flex items-center gap-2 text-sm cursor-pointer mt-7">
+            <input type="checkbox" name="active" value="true" class="w-4 h-4 accent-black" checked> Hiện
+          </label>
+        </div>
+        <div>
+          <label class="label" for="image">Ảnh</label>
+          <input class="input" type="file" id="image" name="image" accept="image/*">
+        </div>
+        <button type="submit" class="btn btn-dark btn-block">Thêm danh mục</button>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>

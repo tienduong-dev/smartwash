@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/app}">
+<head><title>Tài khoản</title></head>
+<body>
+<div layout:fragment="content" class="mx-auto max-w-[1280px] px-6 lg:px-10 py-8">
+
+  <div class="grid lg:grid-cols-[240px_1fr] gap-8">
+
+    <!-- Menu tài khoản -->
+    <nav class="lg:sticky lg:top-24 h-max">
+      <p class="eyebrow mb-4">Tài khoản</p>
+      <div class="space-y-0.5">
+        <a th:href="@{/account}" class="nav-link active">
+          <svg th:replace="~{fragments/icons :: user('18')}"></svg> Hồ sơ
+        </a>
+        <a th:href="@{/account/password}" class="nav-link">
+          <svg th:replace="~{fragments/icons :: shield('18')}"></svg> Đổi mật khẩu
+        </a>
+        <a th:href="@{/addresses}" class="nav-link">
+          <svg th:replace="~{fragments/icons :: pin('18')}"></svg> Sổ địa chỉ
+        </a>
+        <a th:href="@{/orders}" class="nav-link">
+          <svg th:replace="~{fragments/icons :: bag('18')}"></svg> Đơn hàng
+        </a>
+        <a th:href="@{/notifications}" class="nav-link">
+          <svg th:replace="~{fragments/icons :: bell('18')}"></svg> Thông báo
+        </a>
+      </div>
+
+      <form th:action="@{/logout}" method="post" class="mt-4 pt-4 border-t border-line">
+        <button type="submit" class="nav-link w-full text-left">
+          <svg th:replace="~{fragments/icons :: logout('18')}"></svg> Đăng xuất
+        </button>
+      </form>
+    </nav>
+
+    <!-- Nội dung -->
+    <div>
+      <h1 class="text-[22px] font-bold tracking-[-0.025em]">Hồ sơ của tôi</h1>
+      <p class="mt-1 text-sm text-muted">Thông tin này hiển thị khi bạn đặt hàng và đánh giá sản phẩm.</p>
+
+      <div class="card p-6 mt-6">
+        <form th:action="@{/account}" method="post" enctype="multipart/form-data" class="space-y-5">
+
+          <div class="flex items-center gap-4">
+            <img th:if="${user.avatarUrl != null}" th:src="${user.avatarUrl}" alt=""
+                 class="w-16 h-16 rounded-full object-cover">
+            <span th:unless="${user.avatarUrl != null}"
+                  class="w-16 h-16 rounded-full bg-ink text-white text-xl font-bold grid place-items-center"
+                  th:text="${user.initial}">D</span>
+            <div>
+              <label class="label" for="avatar">Ảnh đại diện</label>
+              <input class="input" type="file" id="avatar" name="avatar" accept="image/*">
+              <p class="form-hint">JPG, PNG hoặc WebP, tối đa 5 MB.</p>
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="label" for="fullName">Họ và tên</label>
+              <input class="input" id="fullName" name="fullName" required th:value="${user.fullName}">
+            </div>
+            <div>
+              <label class="label" for="phone">Số điện thoại</label>
+              <input class="input" id="phone" name="phone" inputmode="numeric" th:value="${user.phone}"
+                     placeholder="0912345678">
+            </div>
+          </div>
+
+          <div>
+            <label class="label" for="emailRo">Email</label>
+            <input class="input" id="emailRo" th:value="${user.email}" disabled>
+            <p class="form-hint">Email đăng nhập không đổi được. Cần đổi, vui lòng liên hệ hỗ trợ.</p>
+          </div>
+
+          <div class="flex items-center gap-3 pt-2">
+            <span class="badge" th:classappend="' ' + ${user.statusBadge}" th:text="${user.statusLabel}">…</span>
+            <span class="text-[13px] text-muted" th:text="${user.roleLabels}">…</span>
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" class="btn btn-dark">Lưu thay đổi</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/app}">
+<head><title>Không có quyền truy cập</title></head>
+<body>
+<div layout:fragment="content" class="mx-auto max-w-[1280px] px-6 lg:px-10 py-24 text-center">
+  <p class="text-[64px] font-bold tnum tracking-tighter text-brand-500 leading-none">403</p>
+  <h1 class="mt-4 display-2">Không có quyền truy cập</h1>
+  <p class="mt-4 text-[15px] text-muted max-w-md mx-auto leading-relaxed">
+    Tài khoản của bạn không được phép xem trang này. Nếu bạn cho rằng đây là nhầm lẫn,
+    hãy liên hệ quản trị viên hoặc chủ gian hàng.
+  </p>
+  <div class="mt-8 flex items-center justify-center gap-3">
+    <a th:href="@{/}" class="btn btn-dark">Về trang chủ</a>
+    <a th:href="@{/account}" class="btn btn-outline">Tài khoản của tôi</a>
+  </div>
+</div>
+</body>
+</html>

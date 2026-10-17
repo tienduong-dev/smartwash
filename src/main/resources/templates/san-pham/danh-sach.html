@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/app}">
+<head><title>Sản phẩm</title></head>
+<body>
+<div layout:fragment="content" class="mx-auto max-w-[1280px] px-6 lg:px-10 py-8">
+
+  <div class="flex items-end justify-between gap-4 flex-wrap mb-7">
+    <div>
+      <p class="eyebrow mb-2">Sản phẩm</p>
+      <h1 class="display-2" th:text="${danhMucDangChon != null} ? ${danhMucDangChon.name} : 'Tất cả máy giặt'">
+        Tất cả máy giặt</h1>
+      <p class="mt-2 text-sm text-muted">
+        <span class="tnum font-medium text-ink" th:text="${ds.total}">0</span> sản phẩm
+        <span th:if="${loc.q != null and !loc.q.isBlank()}"
+              th:text="' cho từ khoá “' + ${loc.q} + '”'"></span>
+      </p>
+    </div>
+
+    <form method="get" class="flex items-center gap-2">
+      <input type="hidden" name="q"          th:value="${loc.q}">
+      <input type="hidden" name="categoryId" th:value="${loc.categoryId}">
+      <input type="hidden" name="brandId"    th:value="${loc.brandId}">
+      <input type="hidden" name="doorType"   th:value="${loc.doorType}">
+      <input type="hidden" name="inverter"   th:value="${loc.inverter}">
+      <input type="hidden" name="priceFrom"  th:value="${loc.priceFrom}">
+      <input type="hidden" name="priceTo"    th:value="${loc.priceTo}">
+      <label class="label mb-0 mr-1" for="sort">Sắp xếp</label>
+      <select class="select w-auto" id="sort" name="sort" onchange="this.form.submit()">
+        <option value="moi-nhat" th:selected="${loc.sort == 'moi-nhat'}">Mới nhất</option>
+        <option value="ban-chay" th:selected="${loc.sort == 'ban-chay'}">Bán chạy</option>
+        <option value="gia-tang" th:selected="${loc.sort == 'gia-tang'}">Giá thấp đến cao</option>
+        <option value="gia-giam" th:selected="${loc.sort == 'gia-giam'}">Giá cao đến thấp</option>
+        <option value="danh-gia" th:selected="${loc.sort == 'danh-gia'}">Đánh giá tốt</option>
+      </select>
+    </form>
+  </div>
+
+  <div class="grid lg:grid-cols-[248px_1fr] gap-8 items-start">
+
+    <!-- ============================== BỘ LỌC ============================== -->
+    <form method="get" class="lg:sticky lg:top-24 space-y-6">
+      <input type="hidden" name="sort" th:value="${loc.sort}">
+
+      <div>
+        <label class="label" for="q">Từ khoá</label>
+        <input class="input" id="q" name="q" th:value="${loc.q}" placeholder="Tên hoặc mã model">
+      </div>
+
+      <div>
+        <p class="label">Danh mục</p>
+        <div class="space-y-1.5 max-h-56 overflow-y-auto scroll-thin pr-1">
+          <label class="flex items-center gap-2.5 text-sm cursor-pointer">
+            <input type="radio" name="categoryId" value="" class="accent-black"
+                   th:checked="${loc.categoryId == null}"> Tất cả
+          </label>
+          <th:block th:each="c : ${danhMuc}">
+            <label class="flex items-center gap-2.5 text-sm cursor-pointer">
+              <input type="radio" name="categoryId" th:value="${c.id}" class="accent-black"
+                     th:checked="${loc.categoryId != null and loc.categoryId == c.id}">
+              <span th:text="${c.name}">…</span>
+            </label>
+            <label th:each="con : ${c.children}"
+                   class="flex items-center gap-2.5 text-sm cursor-pointer pl-5 text-muted">
+              <input type="radio" name="categoryId" th:value="${con.id}" class="accent-black"
+                     th:checked="${loc.categoryId != null and loc.categoryId == con.id}">
+              <span th:text="${con.name}">…</span>
+            </label>
+          </th:block>
+        </div>
+      </div>
+
+      <div>
+        <label class="label" for="brandId">Thương hiệu</label>
+        <select class="select" id="brandId" name="brandId">
+          <option value="">Mọi thương hiệu</option>
+          <option th:each="b : ${thuongHieu}" th:value="${b.id}" th:text="${b.name}"
+                  th:selected="${loc.brandId != null and loc.brandId == b.id}">…</option>
+        </select>
+      </div>
+
+      <div>
+        <p class="label">Kiểu cửa</p>
+        <div class="space-y-1.5">
+          <label class="flex items-center gap-2.5 text-sm cursor-pointer">
+            <input type="radio" name="doorType" value="" class="accent-black"
+                   th:checked="${loc.doorType == null or loc.doorType.isBlank()}"> Tất cả
+          </label>
+          <label class="flex items-center gap-2.5 text-sm cursor-pointer">
+            <input type="radio" name="doorType" value="cua_ngang" class="accent-black"
+                   th:checked="${loc.doorType == 'cua_ngang'}"> Cửa ngang
+          </label>
+          <label class="flex items-center gap-2.5 text-sm cursor-pointer">
+            <input type="radio" name="doorType" value="cua_tren" class="accent-black"
+                   th:checked="${loc.doorType == 'cua_tren'}"> Cửa trên
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <p class="label">Khối lượng giặt (kg)</p>
+        <div class="grid grid-cols-2 gap-2">
+          <input class="input tnum" name="capacityFrom" inputmode="decimal" placeholder="Từ"
+                 th:value="${loc.capacityFrom}">
+          <input class="input tnum" name="capacityTo" inputmode="decimal" placeholder="Đến"
+                 th:value="${loc.capacityTo}">
+        </div>
+      </div>
+
+      <div>
+        <p class="label">Giá (₫)</p>
+        <div class="grid grid-cols-2 gap-2">
+          <input class="input tnum" name="priceFrom" inputmode="numeric" placeholder="Từ"
+                 th:value="${loc.priceFrom}">
+          <input class="input tnum" name="priceTo" inputmode="numeric" placeholder="Đến"
+                 th:value="${loc.priceTo}">
+        </div>
+        <p th:if="${khoangGia != null}" class="form-hint tnum"
+           th:text="'Hiện có từ ' + ${#numbers.formatInteger(khoangGia[0], 0, 'POINT')}
+                    + '₫ đến ' + ${#numbers.formatInteger(khoangGia[1], 0, 'POINT')} + '₫'">…</p>
+      </div>
+
+      <label class="flex items-center gap-2.5 text-sm cursor-pointer">
+        <input type="checkbox" name="inverter" value="true" class="w-4 h-4 accent-black"
+               th:checked="${loc.inverter != null and loc.inverter}">
+        Chỉ máy Inverter
+      </label>
+
+      <div class="flex gap-2 pt-1">
+        <button type="submit" class="btn btn-dark btn-block">Áp dụng</button>
+      </div>
+      <a th:if="${loc.coTieuChi()}" th:href="@{/products}"
+         class="block text-center text-[13px] text-muted hover:text-ink transition">
+        Xoá bộ lọc
+      </a>
+    </form>
+
+    <!-- ============================= KẾT QUẢ ============================= -->
+    <div>
+      <div th:if="${ds.empty}" class="card">
+        <div th:replace="~{fragments/alerts :: empty('Không tìm thấy sản phẩm nào', 'Thử bỏ bớt điều kiện lọc hoặc đổi từ khoá.')}"></div>
+      </div>
+
+      <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-x-5 gap-y-9" th:unless="${ds.empty}">
+        <article th:each="p : ${ds.items}" th:replace="~{fragments/san-pham :: the(${p})}"></article>
+      </div>
+
+      <nav th:replace="~{fragments/pagination :: paging(${ds})}"></nav>
+    </div>
+  </div>
+</div>
+</body>
+</html>

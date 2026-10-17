@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/seller}">
+<head><title th:text="${p != null} ? 'Sửa sản phẩm' : 'Thêm sản phẩm'">Sản phẩm</title></head>
+<body>
+<h1 layout:fragment="pageTitle" th:text="${p != null} ? ${p.name} : 'Thêm sản phẩm mới'">Sản phẩm</h1>
+<p layout:fragment="pageSubtitle"
+   th:text="${p != null} ? 'Mã ' + ${p.modelCode} : 'Thương hiệu ' + ${store.brandName} + ' — gán tự động theo gian hàng'">…</p>
+<div layout:fragment="pageActions">
+  <span th:if="${p != null}" class="badge" th:classappend="' ' + ${p.statusBadge}" th:text="${p.statusLabel}">…</span>
+</div>
+
+<div layout:fragment="content">
+  <a th:href="@{'/seller/' + ${store.id} + '/products'}"
+     class="text-sm text-muted hover:text-ink transition">← Danh sách sản phẩm</a>
+
+  <!-- Lý do bị từ chối -->
+  <div th:if="${p != null and p.rejectReason != null}" class="alert alert-error mt-5">
+    <svg th:replace="~{fragments/icons :: x('18')}"></svg>
+    <div>
+      <p class="font-semibold mb-0.5">Quản trị viên chưa duyệt sản phẩm này</p>
+      <p th:text="${p.rejectReason}">…</p>
+    </div>
+  </div>
+
+  <form th:action="${p != null}
+          ? @{'/seller/' + ${store.id} + '/products/' + ${p.id}}
+          : @{'/seller/' + ${store.id} + '/products'}"
+        method="post" class="grid lg:grid-cols-[1fr_340px] gap-6 items-start mt-6">
+
+    <!-- ========================== CỘT TRÁI ========================== -->
+    <div class="space-y-6">
+
+      <div class="card p-6 space-y-4">
+        <p class="font-semibold">Thông tin cơ bản</p>
+
+        <div>
+          <label class="label" for="name">Tên sản phẩm</label>
+          <input class="input" id="name" name="name" required
+                 th:value="${p != null} ? ${p.name} : (${old != null} ? ${old.get('name')} : '')"
+                 placeholder="Máy giặt LG AI DD Inverter 10.5kg FV1450H3W">
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="label" for="modelCode">Mã model</label>
+            <input class="input" id="modelCode" name="modelCode" required
+                   th:value="${p != null} ? ${p.modelCode} : (${old != null} ? ${old.get('modelCode')} : '')"
+                   placeholder="FV1450H3W">
+            <p class="form-hint">Không trùng với sản phẩm khác trong gian hàng của bạn.</p>
+          </div>
+          <div>
+            <label class="label" for="categoryId">Danh mục</label>
+            <select class="select" id="categoryId" name="categoryId" required>
+              <option value="">— Chọn danh mục —</option>
+              <option th:each="c : ${danhMuc}" th:value="${c.id}"
+                      th:text="${c.parent != null} ? '— ' + ${c.name} : ${c.name}"
+                      th:selected="${p != null and p.category != null and p.category.id == c.id}">…</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="label" for="brandRo">Thương hiệu</label>
+          <input class="input" id="brandRo" th:value="${store.brandName}" disabled>
+          <p class="form-hint">
+            Gán tự động theo gian hàng và không đổi được — mỗi gian hàng chỉ bán một thương hiệu.
+          </p>
+        </div>
+
+        <div>
+          <label class="label" for="highlights">Điểm nổi bật</label>
+          <textarea class="input" id="highlights" name="highlights" rows="3"
+                    placeholder="Mỗi dòng một ý, ví dụ: Giặt hơi nước diệt khuẩn 99,9%"
+                    th:text="${p != null} ? ${p.highlights} : ''"></textarea>
+        </div>
+
+        <div>
+          <label class="label" for="description">Mô tả chi tiết</label>
+          <textarea class="input" id="description" name="description" rows="6"
+                    th:text="${p != null} ? ${p.description} : ''"></textarea>
+        </div>
+      </div>
+
+      <!-- Giá -->
+      <div class="card p-6 space-y-4">
+        <p class="font-semibold">Giá bán</p>
+        <div class="grid sm:grid-cols-3 gap-4">
+          <div>
+            <label class="label" for="price">Giá bán (₫)</label>
+            <input class="input tnum" id="price" name="price" required inputmode="numeric"
+                   th:value="${p != null and p.price != null} ? ${#numbers.formatInteger(p.price, 0, 'NONE')} : ''"
+                   placeholder="13410000">
+          </div>
+          <div>
+            <label class="label" for="originalPrice">Giá niêm yết (₫)</label>
+            <input class="input tnum" id="originalPrice" name="originalPrice" inputmode="numeric"
+                   th:value="${p != null and p.originalPrice != null} ? ${#numbers.formatInteger(p.originalPrice, 0, 'NONE')} : ''">
+            <p class="form-hint">Để gạch ngang so sánh.</p>
+          </div>
+          <div>
+            <label class="label" for="promoPrice">Giá khuyến mãi (₫)</label>
+            <input class="input tnum" id="promoPrice" name="promoPrice" inputmode="numeric"
+                   th:value="${p != null and p.promoPrice != null} ? ${#numbers.formatInteger(p.promoPrice, 0, 'NONE')} : ''">
+            <p class="form-hint">Phải thấp hơn hoặc bằng giá bán.</p>
+          </div>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="label" for="promoStartAt">Khuyến mãi từ</label>
+            <input class="input" type="datetime-local" id="promoStartAt" name="promoStartAt"
+                   th:value="${p != null and p.promoStartAt != null} ? ${#temporals.format(p.promoStartAt, 'yyyy-MM-dd''T''HH:mm')} : ''">
+          </div>
+          <div>
+            <label class="label" for="promoEndAt">đến</label>
+            <input class="input" type="datetime-local" id="promoEndAt" name="promoEndAt"
+                   th:value="${p != null and p.promoEndAt != null} ? ${#temporals.format(p.promoEndAt, 'yyyy-MM-dd''T''HH:mm')} : ''">
+          </div>
+        </div>
+      </div>
+
+      <!-- Thông số lọc được -->
+      <div class="card p-6 space-y-4">
+        <p class="font-semibold">Thông số kỹ thuật</p>
+        <p class="text-sm text-muted -mt-2">
+          Những thông số dưới đây khách dùng để lọc và so sánh, nên điền càng đủ càng dễ bán.
+        </p>
+
+        <div class="grid sm:grid-cols-3 gap-4">
+          <div>
+            <label class="label" for="doorType">Kiểu cửa</label>
+            <select class="select" id="doorType" name="doorType">
+              <option value="">— Chọn —</option>
+              <option value="cua_ngang" th:selected="${p != null and p.doorType == 'cua_ngang'}">Cửa ngang</option>
+              <option value="cua_tren"  th:selected="${p != null and p.doorType == 'cua_tren'}">Cửa trên</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="capacityKg">Khối lượng giặt (kg)</label>
+            <input class="input tnum" id="capacityKg" name="capacityKg" inputmode="decimal"
+                   th:value="${p != null and p.capacityKg != null} ? ${p.capacityKg} : ''" placeholder="10.5">
+          </div>
+          <div>
+            <label class="label" for="spinSpeedRpm">Tốc độ vắt (v/p)</label>
+            <input class="input tnum" id="spinSpeedRpm" name="spinSpeedRpm" inputmode="numeric"
+                   th:value="${p != null and p.spinSpeedRpm != null} ? ${p.spinSpeedRpm} : ''" placeholder="1400">
+          </div>
+        </div>
+
+        <div class="grid sm:grid-cols-3 gap-4">
+          <div>
+            <label class="label" for="energyRating">Nhãn năng lượng</label>
+            <input class="input" id="energyRating" name="energyRating"
+                   th:value="${p != null} ? ${p.energyRating} : ''" placeholder="5 sao">
+          </div>
+          <div>
+            <label class="label" for="warrantyMonths">Bảo hành (tháng)</label>
+            <input class="input tnum" id="warrantyMonths" name="warrantyMonths" inputmode="numeric"
+                   th:value="${p != null and p.warrantyMonths != null} ? ${p.warrantyMonths} : '24'">
+          </div>
+          <label class="flex items-center gap-2.5 cursor-pointer mt-7">
+            <input type="checkbox" name="isInverter" value="true" class="w-4 h-4 accent-black"
+                   th:checked="${p != null and p.inverterMachine}">
+            <span class="text-sm font-medium">Có công nghệ Inverter</span>
+          </label>
+        </div>
+
+        <div class="grid sm:grid-cols-4 gap-4">
+          <div>
+            <label class="label" for="widthCm">Rộng (cm)</label>
+            <input class="input tnum" id="widthCm" name="widthCm" inputmode="decimal"
+                   th:value="${p != null and p.widthCm != null} ? ${p.widthCm} : ''">
+          </div>
+          <div>
+            <label class="label" for="heightCm">Cao (cm)</label>
+            <input class="input tnum" id="heightCm" name="heightCm" inputmode="decimal"
+                   th:value="${p != null and p.heightCm != null} ? ${p.heightCm} : ''">
+          </div>
+          <div>
+            <label class="label" for="depthCm">Sâu (cm)</label>
+            <input class="input tnum" id="depthCm" name="depthCm" inputmode="decimal"
+                   th:value="${p != null and p.depthCm != null} ? ${p.depthCm} : ''">
+          </div>
+          <div>
+            <label class="label" for="weightKg">Nặng (kg)</label>
+            <input class="input tnum" id="weightKg" name="weightKg" inputmode="decimal"
+                   th:value="${p != null and p.weightKg != null} ? ${p.weightKg} : ''">
+          </div>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="label" for="powerKwhYear">Điện năng (kWh/năm)</label>
+            <input class="input tnum" id="powerKwhYear" name="powerKwhYear" inputmode="decimal"
+                   th:value="${p != null and p.powerKwhYear != null} ? ${p.powerKwhYear} : ''">
+          </div>
+          <div>
+            <label class="label" for="waterLiterCycle">Nước (lít/lần giặt)</label>
+            <input class="input tnum" id="waterLiterCycle" name="waterLiterCycle" inputmode="decimal"
+                   th:value="${p != null and p.waterLiterCycle != null} ? ${p.waterLiterCycle} : ''">
+          </div>
+        </div>
+      </div>
+
+      <!-- Thông số phụ -->
+      <div class="card p-6">
+        <p class="font-semibold mb-1">Thông số thêm</p>
+        <p class="text-sm text-muted mb-4">
+          Phần chỉ để hiển thị, không dùng lọc. Ví dụ: “Số chương trình giặt” — “14”.
+        </p>
+
+        <div id="o-thong-so" class="space-y-2.5">
+          <th:block th:if="${p != null}">
+            <div th:each="s : ${p.specs}" class="grid grid-cols-[1fr_1.4fr_auto] gap-2">
+              <input class="input" name="specKey" th:value="${s.key}" placeholder="Tên thông số">
+              <input class="input" name="specValue" th:value="${s.value}" placeholder="Giá trị">
+              <button type="button" class="btn btn-ghost btn-sm text-red-600"
+                      onclick="this.parentElement.remove()">Xoá</button>
+            </div>
+          </th:block>
+          <div class="grid grid-cols-[1fr_1.4fr_auto] gap-2">
+            <input class="input" name="specKey" placeholder="Tên thông số">
+            <input class="input" name="specValue" placeholder="Giá trị">
+            <button type="button" class="btn btn-ghost btn-sm text-red-600"
+                    onclick="this.parentElement.remove()">Xoá</button>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-outline btn-sm mt-3" onclick="themDongThongSo()">
+          <svg th:replace="~{fragments/icons :: plus('15')}"></svg>
+          Thêm dòng
+        </button>
+      </div>
+    </div>
+
+    <!-- ========================== CỘT PHẢI ========================== -->
+    <div class="space-y-4 lg:sticky lg:top-24">
+
+      <button type="submit" class="btn btn-dark btn-block btn-lg"
+              th:text="${p != null} ? 'Lưu thay đổi' : 'Tạo sản phẩm'">Lưu</button>
+
+      <div class="card p-5">
+        <p class="font-semibold mb-3">Tồn kho</p>
+        <div class="space-y-3">
+          <div>
+            <label class="label" for="quantity">Số lượng</label>
+            <input class="input tnum" id="quantity" name="quantity" inputmode="numeric"
+                   th:value="${p != null and p.inventory != null} ? ${p.inventory.quantityAvailable} : '0'">
+          </div>
+          <div>
+            <label class="label" for="minStock">Cảnh báo khi còn dưới</label>
+            <input class="input tnum" id="minStock" name="minStock" inputmode="numeric"
+                   th:value="${p != null and p.inventory != null} ? ${p.inventory.minStock} : '0'">
+            <p class="form-hint">Đặt 0 để tắt cảnh báo.</p>
+          </div>
+          <div>
+            <label class="label" for="costPrice">Giá vốn (₫)</label>
+            <input class="input tnum" id="costPrice" name="costPrice" inputmode="numeric"
+                   th:value="${p != null and p.inventory != null} ? ${p.inventory.costPrice} : '0'">
+            <p class="form-hint">Chỉ bạn thấy, dùng để tính lãi.</p>
+          </div>
+          <p th:if="${p != null and p.inventory != null and p.inventory.quantityReserved > 0}"
+             class="form-hint tnum"
+             th:text="'Đang giữ chỗ ' + ${p.inventory.quantityReserved} + ' cho đơn chưa hoàn tất.'"></p>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- ===================== ẢNH + HÀNH ĐỘNG (ngoài form chính) ===================== -->
+  <div th:if="${p != null}" class="grid lg:grid-cols-[1fr_340px] gap-6 items-start mt-6">
+
+    <div class="card p-6">
+      <div class="flex items-center justify-between gap-4 mb-4">
+        <div>
+          <p class="font-semibold">Ảnh sản phẩm</p>
+          <p class="text-sm text-muted">Ảnh đầu tiên là ảnh đại diện. Tối đa 10 ảnh.</p>
+        </div>
+        <span class="text-[13px] text-muted tnum" th:text="${#lists.size(p.images)} + '/10'">0/10</span>
+      </div>
+
+      <div th:if="${#lists.isEmpty(p.images)}" class="alert alert-info mb-4">
+        <svg th:replace="~{fragments/icons :: info('18')}"></svg>
+        <p>Chưa có ảnh nào. Sản phẩm cần ít nhất một ảnh mới nộp duyệt được.</p>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4" th:unless="${#lists.isEmpty(p.images)}">
+        <div th:each="img : ${p.images}" class="relative group">
+          <div class="tile aspect-square overflow-hidden"
+               th:classappend="${img.primaryImage} ? ' ring-2 ring-brand-500' : ''">
+            <img th:src="${img.url}" alt="" class="w-full h-full object-contain p-2">
+          </div>
+          <span th:if="${img.primaryImage}"
+                class="absolute top-2 left-2 badge badge-brand">Đại diện</span>
+
+          <div class="mt-2 flex gap-1">
+            <form th:unless="${img.primaryImage}"
+                  th:action="@{'/seller/' + ${store.id} + '/products/' + ${p.id} + '/images/' + ${img.id} + '/primary'}"
+                  method="post" class="flex-1">
+              <button type="submit" class="btn btn-ghost btn-sm btn-block">Đặt đại diện</button>
+            </form>
+            <form th:action="@{'/seller/' + ${store.id} + '/products/' + ${p.id} + '/images/' + ${img.id} + '/delete'}"
+                  method="post" onsubmit="return confirm('Xoá ảnh này?');">
+              <button type="submit" class="btn btn-ghost btn-sm text-red-600">Xoá</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <form th:action="@{'/seller/' + ${store.id} + '/products/' + ${p.id} + '/images'}"
+            method="post" enctype="multipart/form-data" class="flex gap-2 flex-wrap items-end">
+        <div class="flex-1 min-w-[220px]">
+          <label class="label" for="file">Thêm ảnh</label>
+          <input class="input" type="file" id="file" name="file" accept="image/*" required>
+        </div>
+        <button type="submit" class="btn btn-outline">Tải lên</button>
+      </form>
+    </div>
+
+    <div class="space-y-4">
+      <div th:if="${p.canSubmit()}" class="card p-5">
+        <p class="font-semibold mb-1">Nộp duyệt</p>
+        <p class="text-[13px] text-muted mb-3">
+          Quản trị viên sẽ kiểm tra thông tin và ảnh trước khi sản phẩm hiện với khách.
+        </p>
+        <form th:action="@{'/seller/' + ${store.id} + '/products/' + ${p.id} + '/submit'}" method="post">
+          <button type="submit" class="btn btn-brand btn-block">Nộp duyệt</button>
+        </form>
+      </div>
+
+      <div th:if="${p.awaitingReview}" class="alert alert-info">
+        <svg th:replace="~{fragments/icons :: info('18')}"></svg>
+        <p>Đang chờ quản trị viên duyệt. Trong lúc này sản phẩm tạm khoá chỉnh sửa.</p>
+      </div>
+
+      <form th:if="${p.status == 'ACTIVE'}"
+            th:action="@{'/seller/' + ${store.id} + '/products/' + ${p.id} + '/selling'}" method="post">
+        <input type="hidden" name="selling" value="false">
+        <button type="submit" class="btn btn-outline btn-block">Tạm ngừng bán</button>
+      </form>
+
+      <form th:if="${p.status == 'INACTIVE'}"
+            th:action="@{'/seller/' + ${store.id} + '/products/' + ${p.id} + '/selling'}" method="post">
+        <input type="hidden" name="selling" value="true">
+        <button type="submit" class="btn btn-brand btn-block">Mở bán lại</button>
+      </form>
+
+      <a th:if="${p.sellable}" th:href="@{'/products/' + ${p.slug}}" target="_blank" rel="noopener"
+         class="btn btn-ghost btn-block">Xem trang khách thấy</a>
+
+      <form th:action="@{'/seller/' + ${store.id} + '/products/' + ${p.id} + '/delete'}" method="post"
+            onsubmit="return confirm('Xoá hẳn sản phẩm này? Không khôi phục được.');">
+        <button type="submit" class="btn btn-ghost btn-block text-red-600">Xoá sản phẩm</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<th:block layout:fragment="scripts">
+<script>
+  // Thêm một dòng thông số trống. Không dùng innerHTML để khỏi mất
+  // giá trị người dùng đã gõ ở các dòng trước.
+  function themDongThongSo() {
+    const o = document.getElementById('o-thong-so');
+    const mau = o.lastElementChild;
+    const moi = mau.cloneNode(true);
+    moi.querySelectorAll('input').forEach(i => i.value = '');
+    o.appendChild(moi);
+    moi.querySelector('input').focus();
+  }
+</script>
+</th:block>
+</body>
+</html>

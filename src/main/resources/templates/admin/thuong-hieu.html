@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/admin}">
+<head><title>Thương hiệu</title></head>
+<body>
+<h1 layout:fragment="pageTitle">Thương hiệu</h1>
+<p layout:fragment="pageSubtitle" th:text="${ds.total} + ' thương hiệu'">…</p>
+
+<div layout:fragment="content">
+  <div class="grid lg:grid-cols-[1fr_320px] gap-6 items-start">
+
+    <div>
+      <form method="get" class="card p-4 mb-5 grid md:grid-cols-[1fr_200px_auto] gap-3">
+        <input class="input" name="q" th:value="${q}" placeholder="Tìm theo tên thương hiệu…">
+        <select class="select" name="status">
+          <option value="">Mọi trạng thái</option>
+          <option value="ACTIVE"               th:selected="${status == 'ACTIVE'}">Đang hoạt động</option>
+          <option value="PENDING_VERIFICATION" th:selected="${status == 'PENDING_VERIFICATION'}">Chờ xác minh</option>
+          <option value="LOCKED"               th:selected="${status == 'LOCKED'}">Đã khoá</option>
+        </select>
+        <button type="submit" class="btn btn-dark">Lọc</button>
+      </form>
+
+      <div th:if="${ds.empty}" class="card">
+        <div th:replace="~{fragments/alerts :: empty('Chưa có thương hiệu nào', 'Tạo thương hiệu đầu tiên ở khung bên phải.')}"></div>
+      </div>
+
+      <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4" th:unless="${ds.empty}">
+        <a th:each="b : ${ds.items}" th:href="@{'/admin/brands/' + ${b.id}}"
+           class="card p-5 hover:shadow-[0_12px_40px_-16px_rgb(0_0_0/0.15)] transition">
+          <div class="flex items-start gap-3">
+            <img th:src="${b.logoUrl}" alt="" class="w-11 h-11 rounded-xl object-contain bg-line-soft p-1.5">
+            <div class="min-w-0 flex-1">
+              <p class="font-semibold truncate" th:text="${b.name}">…</p>
+              <p class="text-[12px] text-faint truncate" th:text="${b.country ?: '—'}">…</p>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center justify-between gap-2">
+            <span class="badge" th:classappend="' ' + ${b.statusBadge}" th:text="${b.statusLabel}">…</span>
+            <code class="text-[11px] text-faint truncate" th:text="${b.normalizedName}">…</code>
+          </div>
+        </a>
+      </div>
+
+      <nav th:replace="~{fragments/pagination :: paging(${ds})}"></nav>
+    </div>
+
+    <div class="card p-5 lg:sticky lg:top-24">
+      <p class="font-semibold mb-1">Thêm thương hiệu</p>
+      <p class="text-[13px] text-muted mb-4">Thương hiệu do quản trị viên tạo sẽ hoạt động ngay.</p>
+      <form th:action="@{/admin/brands}" method="post" class="space-y-3.5">
+        <div>
+          <label class="label" for="name">Tên thương hiệu</label>
+          <input class="input" id="name" name="name" required placeholder="Electrolux">
+        </div>
+        <div>
+          <label class="label" for="country">Quốc gia</label>
+          <input class="input" id="country" name="country" placeholder="Thuỵ Điển">
+        </div>
+        <div>
+          <label class="label" for="website">Website</label>
+          <input class="input" id="website" name="website" placeholder="https://…">
+        </div>
+        <div>
+          <label class="label" for="description">Mô tả</label>
+          <textarea class="input" id="description" name="description" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-dark btn-block">Tạo thương hiệu</button>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>
