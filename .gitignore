@@ -1,0 +1,22 @@
+# Kết quả biên dịch
+target/
+out/
+*.class
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Node (chỉ dùng để biên dịch Tailwind)
+node_modules/
+
+# Ảnh và giấy tờ người dùng tải lên — dữ liệu chạy, không thuộc mã nguồn
+uploads/
+uploads-private/
+
+# Log và file tạm
+*.log
+.DS_Store
+Thumbs.db
