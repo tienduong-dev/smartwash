@@ -20,3 +20,6 @@ uploads-private/
 *.log
 .DS_Store
 Thumbs.db
+
+# Ghi chu ca nhan
+*.docx
