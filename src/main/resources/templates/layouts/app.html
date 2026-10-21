@@ -50,6 +50,9 @@
     <div class="flex items-center gap-1">
       <a th:href="@{/cart}" class="btn-icon relative" aria-label="Giỏ hàng">
         <svg th:replace="~{fragments/icons :: bag('19')}"></svg>
+        <span th:if="${soMonTrongGio != null and soMonTrongGio > 0}"
+              class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-brand-500 text-white text-[10px] font-bold grid place-items-center tnum"
+              th:text="${soMonTrongGio > 99 ? '99+' : soMonTrongGio}">0</span>
       </a>
 
       <a th:if="${isLoggedIn}" th:href="@{/notifications}" class="btn-icon relative" aria-label="Thông báo">

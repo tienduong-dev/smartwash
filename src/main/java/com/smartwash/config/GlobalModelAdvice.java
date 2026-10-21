@@ -1,6 +1,7 @@
 package com.smartwash.config;
 
 import com.smartwash.auth.AuthService;
+import com.smartwash.cart.CartService;
 import com.smartwash.common.FormErrors;
 import com.smartwash.common.OldInput;
 import com.smartwash.notification.NotificationService;
@@ -25,17 +26,20 @@ public class GlobalModelAdvice {
     private final StoreContext storeContext;
     private final SellerRegistrationService registrationService;
     private final ProductService productService;
+    private final CartService cartService;
 
     public GlobalModelAdvice(AuthService authService,
                              NotificationService notificationService,
                              StoreContext storeContext,
                              SellerRegistrationService registrationService,
-                             ProductService productService) {
+                             ProductService productService,
+                             CartService cartService) {
         this.authService = authService;
         this.notificationService = notificationService;
         this.storeContext = storeContext;
         this.registrationService = registrationService;
         this.productService = productService;
+        this.cartService = cartService;
     }
 
     @ModelAttribute
@@ -60,6 +64,7 @@ public class GlobalModelAdvice {
         }
 
         model.addAttribute("soThongBaoChuaDoc", notificationService.soChuaDoc(user.getId()));
+        model.addAttribute("soMonTrongGio", cartService.soLuongTrenHeader(user.getId()));
 
         // Danh sách gian hàng để đổi nhanh ở thanh bên khu người bán
         if (path.startsWith("/seller")) {

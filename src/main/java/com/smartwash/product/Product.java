@@ -352,6 +352,60 @@ public class Product {
                 + depthCm.stripTrailingZeros().toPlainString() + " cm";
     }
 
+    // ==================================================== chi phí vận hành
+
+    /*
+     * Ước tính chi phí điện nước một năm từ thông số nhà sản xuất công bố,
+     * hiển thị ở cột phải trang chi tiết để khách so sánh giữa các máy.
+     *
+     * Đây là con số THAM KHẢO, không phải cam kết: đơn giá điện nước thay đổi
+     * theo bậc thang và theo địa phương, số lần giặt mỗi nhà mỗi khác. Giao diện
+     * phải ghi rõ giả định kèm theo. Khi có bảng giá thật thì chuyển mấy hằng số
+     * này sang bảng settings thay vì sửa code.
+     */
+    private static final BigDecimal GIA_DIEN_MOI_KWH = new BigDecimal("2000");
+    private static final BigDecimal GIA_NUOC_MOI_M3  = new BigDecimal("10000");
+    private static final int LAN_GIAT_MOI_NAM = 208;   // 4 lần/tuần × 52 tuần
+
+    public boolean hasRunningCost() {
+        return powerKwhYear != null || waterLiterCycle != null;
+    }
+
+    /** Tiền điện ước tính mỗi năm, null nếu chưa khai điện năng tiêu thụ. */
+    public BigDecimal getYearlyPowerCost() {
+        if (powerKwhYear == null) {
+            return null;
+        }
+        return powerKwhYear.multiply(GIA_DIEN_MOI_KWH).setScale(0, RoundingMode.HALF_UP);
+    }
+
+    /** Tiền nước ước tính mỗi năm, null nếu chưa khai lượng nước mỗi lần giặt. */
+    public BigDecimal getYearlyWaterCost() {
+        if (waterLiterCycle == null) {
+            return null;
+        }
+        return waterLiterCycle
+                .multiply(BigDecimal.valueOf(LAN_GIAT_MOI_NAM))
+                .divide(BigDecimal.valueOf(1000), 6, RoundingMode.HALF_UP)  // lít -> m³
+                .multiply(GIA_NUOC_MOI_M3)
+                .setScale(0, RoundingMode.HALF_UP);
+    }
+
+    /** Tổng điện + nước, bỏ qua phần nào chưa có số liệu. */
+    public BigDecimal getYearlyRunningCost() {
+        BigDecimal dien = getYearlyPowerCost();
+        BigDecimal nuoc = getYearlyWaterCost();
+        if (dien == null && nuoc == null) {
+            return null;
+        }
+        return (dien == null ? BigDecimal.ZERO : dien)
+                .add(nuoc == null ? BigDecimal.ZERO : nuoc);
+    }
+
+    public int getWashesPerYearAssumed() {
+        return LAN_GIAT_MOI_NAM;
+    }
+
     // ============================================================== tồn kho
 
     /** Số lượng bán được = tồn thực trừ phần đang giữ chỗ cho đơn chưa xong. */

@@ -97,7 +97,11 @@ public class AccessInterceptor implements HandlerInterceptor {
     }
 
     private boolean canDangNhap(String path) {
-        return batDau(path, "/account")
+        // Giỏ hàng gắn với tài khoản (bảng carts khoá theo user_id) chứ không
+        // nằm trong phiên, nên phải đăng nhập mới dùng được. Đổi lại giỏ còn
+        // nguyên khi khách mở máy khác.
+        return batDau(path, "/cart")
+                || batDau(path, "/account")
                 || batDau(path, "/orders")
                 || batDau(path, "/checkout")
                 || batDau(path, "/addresses")

@@ -185,19 +185,120 @@
       </section>
     </div>
 
-    <aside th:if="${p.store != null}" class="space-y-5">
-      <div th:if="${p.store.warrantyPolicy != null}" class="panel p-5">
-        <p class="font-semibold mb-2">Chính sách bảo hành</p>
-        <p class="text-sm text-muted leading-relaxed" th:text="${p.store.warrantyPolicy}">…</p>
+    <!-- Cột phải bám theo khi cuộn: đặt sticky lên div bên trong, không lên thẻ
+         aside, vì ô lưới bị kéo cao bằng cả hàng nên sticky trên nó vô tác dụng. -->
+    <aside>
+     <div class="space-y-5 lg:sticky lg:top-24">
+
+      <!-- Cam kết dịch vụ: lấp khoảng trống bên phải bằng thông tin khách
+           đang cần lúc cân nhắc mua, thay vì để trống hoặc chèn ảnh trang trí. -->
+      <div class="panel p-5">
+        <p class="font-semibold mb-4">Cam kết khi mua tại SmartWash</p>
+        <ul class="space-y-3.5">
+          <li class="flex gap-3">
+            <span class="shrink-0 w-9 h-9 rounded-xl bg-line-soft text-ink flex items-center justify-center">
+              <svg th:replace="~{fragments/icons :: shield('17')}"></svg>
+            </span>
+            <span class="min-w-0">
+              <span class="block text-sm font-medium leading-snug">Hàng chính hãng</span>
+              <span class="block text-[13px] text-muted leading-snug mt-0.5">Chỉ bán qua gian hàng được quản trị viên thẩm định</span>
+            </span>
+          </li>
+          <li class="flex gap-3">
+            <span class="shrink-0 w-9 h-9 rounded-xl bg-line-soft text-ink flex items-center justify-center">
+              <svg th:replace="~{fragments/icons :: box('17')}"></svg>
+            </span>
+            <span class="min-w-0">
+              <span class="block text-sm font-medium leading-snug">Giao lắp tận nơi</span>
+              <span class="block text-[13px] text-muted leading-snug mt-0.5">Kỹ thuật viên lắp đặt và chạy thử trước khi bàn giao</span>
+            </span>
+          </li>
+          <li class="flex gap-3">
+            <span class="shrink-0 w-9 h-9 rounded-xl bg-line-soft text-ink flex items-center justify-center">
+              <svg th:replace="~{fragments/icons :: history('17')}"></svg>
+            </span>
+            <span class="min-w-0">
+              <span class="block text-sm font-medium leading-snug">Bảo hành
+                <span class="tnum" th:text="${p.warrantyMonths} + ' tháng'">24 tháng</span></span>
+              <span class="block text-[13px] text-muted leading-snug mt-0.5">Theo phiếu bảo hành của nhà sản xuất</span>
+            </span>
+          </li>
+          <li class="flex gap-3">
+            <span class="shrink-0 w-9 h-9 rounded-xl bg-line-soft text-ink flex items-center justify-center">
+              <svg th:replace="~{fragments/icons :: check('17')}"></svg>
+            </span>
+            <span class="min-w-0">
+              <span class="block text-sm font-medium leading-snug">Đổi trả 7 ngày</span>
+              <span class="block text-[13px] text-muted leading-snug mt-0.5">Nếu sản phẩm lỗi do nhà sản xuất</span>
+            </span>
+          </li>
+        </ul>
       </div>
-      <div th:if="${p.store.returnPolicy != null}" class="panel p-5">
-        <p class="font-semibold mb-2">Chính sách đổi trả</p>
-        <p class="text-sm text-muted leading-relaxed" th:text="${p.store.returnPolicy}">…</p>
+
+      <!-- Chi phí vận hành: quy thông số điện/nước thành tiền một năm để khách
+           so sánh được giữa các máy. Số tham khảo, giả định ghi rõ ngay dưới. -->
+      <div th:if="${p.hasRunningCost()}" class="panel p-5">
+        <p class="font-semibold mb-1">Chi phí điện nước ước tính</p>
+        <p class="text-[13px] text-muted mb-4">Một năm sử dụng</p>
+
+        <p class="text-[26px] font-bold tnum tracking-tight leading-none"
+           th:text="${#numbers.formatInteger(p.yearlyRunningCost, 0, 'POINT')} + '₫'">0₫</p>
+
+        <dl class="mt-4 space-y-2 text-sm">
+          <div th:if="${p.yearlyPowerCost != null}" class="flex justify-between gap-3">
+            <dt class="text-muted">Tiền điện</dt>
+            <dd class="tnum font-medium"
+                th:text="${#numbers.formatInteger(p.yearlyPowerCost, 0, 'POINT')} + '₫'">0₫</dd>
+          </div>
+          <div th:if="${p.yearlyWaterCost != null}" class="flex justify-between gap-3">
+            <dt class="text-muted">Tiền nước</dt>
+            <dd class="tnum font-medium"
+                th:text="${#numbers.formatInteger(p.yearlyWaterCost, 0, 'POINT')} + '₫'">0₫</dd>
+          </div>
+        </dl>
+
+        <p class="mt-4 pt-4 border-t border-line-soft text-[12px] text-faint leading-relaxed">
+          Tạm tính với giá điện 2.000 ₫/kWh, giá nước 10.000 ₫/m³ và
+          <span class="tnum" th:text="${p.washesPerYearAssumed}">208</span> lần giặt mỗi năm.
+          Chi phí thực tế thay đổi theo bậc giá và thói quen sử dụng.
+        </p>
       </div>
-      <div th:if="${p.store.shippingPolicy != null}" class="panel p-5">
-        <p class="font-semibold mb-2">Giao hàng</p>
-        <p class="text-sm text-muted leading-relaxed" th:text="${p.store.shippingPolicy}">…</p>
-      </div>
+
+      <th:block th:if="${p.store != null}">
+
+        <!-- Liên hệ gian hàng: lấy từ hồ sơ đã được quản trị viên thẩm định. -->
+        <div th:if="${p.store.phone != null or p.store.email != null}" class="panel p-5">
+          <p class="font-semibold mb-3">Liên hệ gian hàng</p>
+          <dl class="space-y-2.5 text-sm">
+            <div th:if="${p.store.phone != null}">
+              <dt class="text-[12px] text-faint">Điện thoại</dt>
+              <dd class="tnum font-medium" th:text="${p.store.phone}">…</dd>
+            </div>
+            <div th:if="${p.store.email != null}">
+              <dt class="text-[12px] text-faint">Email</dt>
+              <dd class="font-medium truncate" th:text="${p.store.email}">…</dd>
+            </div>
+            <div th:if="${p.store.pickupAddress != null}">
+              <dt class="text-[12px] text-faint">Địa chỉ</dt>
+              <dd class="text-muted leading-snug" th:text="${p.store.pickupAddress}">…</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div th:if="${p.store.warrantyPolicy != null}" class="panel p-5">
+          <p class="font-semibold mb-2">Chính sách bảo hành</p>
+          <p class="text-sm text-muted leading-relaxed" th:text="${p.store.warrantyPolicy}">…</p>
+        </div>
+        <div th:if="${p.store.returnPolicy != null}" class="panel p-5">
+          <p class="font-semibold mb-2">Chính sách đổi trả</p>
+          <p class="text-sm text-muted leading-relaxed" th:text="${p.store.returnPolicy}">…</p>
+        </div>
+        <div th:if="${p.store.shippingPolicy != null}" class="panel p-5">
+          <p class="font-semibold mb-2">Giao hàng</p>
+          <p class="text-sm text-muted leading-relaxed" th:text="${p.store.shippingPolicy}">…</p>
+        </div>
+      </th:block>
+     </div>
     </aside>
   </div>
 
