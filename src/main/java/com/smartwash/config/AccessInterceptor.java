@@ -108,7 +108,8 @@ public class AccessInterceptor implements HandlerInterceptor {
                 || batDau(path, "/notifications")
                 || batDau(path, "/wishlist")
                 || batDau(path, "/reviews")
-                || batDau(path, "/support")
+                // /support là trang câu hỏi thường gặp, cố tình để công khai:
+                // khách chưa có tài khoản cũng cần đọc chính sách trước khi mua.
                 || batDau(path, "/returns")
                 || batDau(path, "/warranties");
     }

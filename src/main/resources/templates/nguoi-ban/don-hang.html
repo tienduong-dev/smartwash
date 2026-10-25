@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/seller}">
+<head><title>Đơn hàng</title></head>
+<body>
+<h1 layout:fragment="pageTitle">Đơn hàng</h1>
+<p layout:fragment="pageSubtitle" th:text="${ds.total} + ' đơn'">…</p>
+
+<div layout:fragment="content">
+
+  <div th:if="${soChoXuLy > 0}" class="alert alert-info mb-5">
+    <svg th:replace="~{fragments/icons :: info('18')}"></svg>
+    <p>
+      <span class="tnum" th:text="${soChoXuLy}">0</span> đơn đang chờ bạn xử lý.
+      Xác nhận sớm để khách không huỷ.
+    </p>
+  </div>
+
+  <form method="get" class="card p-4 mb-5 grid md:grid-cols-[1fr_200px_auto] gap-3">
+    <input class="input" name="q" th:value="${q}" placeholder="Mã đơn, tên hoặc số điện thoại khách…">
+    <select class="select" name="status">
+      <option value="">Mọi trạng thái</option>
+      <option value="PENDING_CONFIRMATION" th:selected="${status == 'PENDING_CONFIRMATION'}">Chờ xác nhận</option>
+      <option value="CONFIRMED"  th:selected="${status == 'CONFIRMED'}">Đã xác nhận</option>
+      <option value="PROCESSING" th:selected="${status == 'PROCESSING'}">Đang chuẩn bị hàng</option>
+      <option value="SHIPPED"    th:selected="${status == 'SHIPPED'}">Đang giao</option>
+      <option value="DELIVERED"  th:selected="${status == 'DELIVERED'}">Đã giao</option>
+      <option value="COMPLETED"  th:selected="${status == 'COMPLETED'}">Hoàn tất</option>
+      <option value="CANCELLED"  th:selected="${status == 'CANCELLED'}">Đã huỷ</option>
+    </select>
+    <button type="submit" class="btn btn-dark">Lọc</button>
+  </form>
+
+  <div class="card overflow-x-auto">
+    <div th:if="${ds.empty}">
+      <div th:replace="~{fragments/alerts :: empty('Chưa có đơn nào', 'Đơn khách đặt từ gian hàng này sẽ hiện ở đây.')}"></div>
+    </div>
+
+    <table class="table table-hover" th:unless="${ds.empty}">
+      <thead>
+        <tr><th>Mã đơn</th><th>Khách hàng</th><th>Sản phẩm</th><th>Thực nhận</th><th>Trạng thái</th><th>Đặt lúc</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr th:each="so : ${ds.items}">
+          <td class="tnum font-medium" th:text="${so.storeOrderCode}">…</td>
+          <td>
+            <p class="font-medium" th:text="${so.order.receiverName}">…</p>
+            <p class="text-[12px] text-muted tnum" th:text="${so.order.receiverPhone}">…</p>
+          </td>
+          <td class="tnum text-muted" th:text="${so.totalQuantity} + ' món'">…</td>
+          <td>
+            <p class="font-medium tnum"
+               th:text="${#numbers.formatInteger(so.sellerAmount, 0, 'POINT')} + '₫'">0₫</p>
+            <p class="text-[12px] text-faint tnum"
+               th:text="'hoa hồng ' + ${#numbers.formatInteger(so.commissionAmount, 0, 'POINT')} + '₫'">…</p>
+          </td>
+          <td><span class="badge" th:classappend="' ' + ${so.statusBadge}" th:text="${so.statusLabel}">…</span></td>
+          <td class="tnum text-muted"
+              th:text="${#temporals.format(so.createdAt, 'HH:mm dd/MM/yy')}">…</td>
+          <td class="text-right">
+            <a th:href="@{'/seller/' + ${store.id} + '/orders/' + ${so.storeOrderCode}}"
+               class="btn btn-ghost btn-sm">Xem</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <nav th:replace="~{fragments/pagination :: paging(${ds})}"></nav>
+</div>
+</body>
+</html>

@@ -42,4 +42,16 @@ public class HomeController {
         model.addAttribute("gianHang", storeRepository.congKhai(PageRequest.of(0, 60)).getContent());
         return "gian-hang/danh-sach";
     }
+
+    /**
+     * Trang hỗ trợ — nội dung tĩnh, không cần đăng nhập.
+     *
+     * Trả lời sẵn những câu khách hay hỏi trước khi mua: hàng có chính hãng
+     * không, bao lâu thì giao, lỗi thì đổi thế nào. Đỡ cho bộ phận hỗ trợ và
+     * cũng là chỗ menu "Hỗ trợ" trỏ tới.
+     */
+    @GetMapping("/support")
+    public String hoTro() {
+        return "ho-tro/index";
+    }
 }

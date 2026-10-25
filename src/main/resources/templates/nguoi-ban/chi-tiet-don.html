@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/seller}">
+<head><title th:text="'Đơn ' + ${so.storeOrderCode}">Chi tiết đơn</title></head>
+<body>
+<h1 layout:fragment="pageTitle" class="tnum" th:text="${so.storeOrderCode}">…</h1>
+<p layout:fragment="pageSubtitle"
+   th:text="'Đặt lúc ' + ${#temporals.format(so.createdAt, 'HH:mm dd/MM/yyyy')}">…</p>
+<div layout:fragment="pageActions">
+  <a th:href="@{'/seller/' + ${store.id} + '/orders'}" class="btn btn-ghost btn-sm">Về danh sách</a>
+</div>
+
+<div layout:fragment="content" class="grid lg:grid-cols-[1fr_340px] gap-6 items-start">
+
+  <div class="space-y-6">
+
+    <!-- ============================ HÀNG ============================ -->
+    <div class="card overflow-hidden">
+      <div class="flex items-center gap-3 px-5 py-4 border-b border-line-soft">
+        <span class="font-semibold">Hàng cần giao</span>
+        <span class="badge" th:classappend="' ' + ${so.statusBadge}" th:text="${so.statusLabel}">…</span>
+      </div>
+
+      <div class="divide-y divide-line-soft">
+        <!-- Dữ liệu lấy từ bản chụp lúc mua, không đọc lại bảng products (BR-10) -->
+        <div th:each="m : ${so.items}" class="p-5 flex gap-4">
+          <span class="tile w-16 h-16 shrink-0 overflow-hidden">
+            <img th:src="${m.imageUrl}" th:alt="${m.productName}"
+                 class="w-full h-full object-contain p-1.5" loading="lazy">
+          </span>
+          <div class="min-w-0 flex-1">
+            <p class="font-medium leading-snug truncate-2" th:text="${m.productName}">…</p>
+            <p class="text-[13px] text-muted tnum mt-0.5"
+               th:text="${m.modelCode} + ' · bảo hành ' + ${m.warrantyMonths} + ' tháng'">…</p>
+            <p class="text-[13px] text-muted tnum mt-0.5"
+               th:text="${#numbers.formatInteger(m.unitPrice, 0, 'POINT')} + '₫ × ' + ${m.quantity}">…</p>
+          </div>
+          <span class="font-bold tnum shrink-0"
+                th:text="${#numbers.formatInteger(m.subtotal, 0, 'POINT')} + '₫'">0₫</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================= NHẬT KÝ ========================= -->
+    <div class="card p-5">
+      <p class="font-semibold mb-4">Nhật ký xử lý</p>
+      <ol class="space-y-3">
+        <li th:each="h : ${lichSu}" class="flex gap-3 text-sm">
+          <span class="tnum text-faint shrink-0 w-28"
+                th:text="${#temporals.format(h.createdAt, 'HH:mm dd/MM/yy')}">…</span>
+          <span class="min-w-0">
+            <span class="font-medium" th:text="${h.toStatus}">…</span>
+            <span class="text-muted" th:if="${h.note != null}" th:text="' — ' + ${h.note}">…</span>
+            <span class="block text-[12px] text-faint" th:text="${h.actorName}">…</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ============================ BÊN PHẢI ============================ -->
+  <aside class="space-y-5">
+
+    <!-- Nút hành động sinh từ máy trạng thái trong SellerOrderService:
+         giao diện không tự quyết định bước nào hợp lệ, nó chỉ vẽ lại
+         những bước mà tầng nghiệp vụ cho phép. -->
+    <div th:if="${!#sets.isEmpty(buocTiep)}" class="panel p-5">
+      <p class="font-semibold mb-1">Bước tiếp theo</p>
+      <p class="text-[13px] text-muted leading-relaxed mb-4">
+        Đơn đang ở trạng thái <span th:text="${so.statusLabel}">…</span>.
+      </p>
+
+      <form th:action="@{'/seller/' + ${store.id} + '/orders/' + ${so.storeOrderCode} + '/status'}"
+            method="post" class="space-y-3">
+        <input type="text" name="note" class="input" placeholder="Ghi chú (không bắt buộc)">
+
+        <button th:if="${#sets.contains(buocTiep, 'CONFIRMED')}" type="submit" name="to" value="CONFIRMED"
+                class="btn btn-dark btn-block">Xác nhận đơn</button>
+        <button th:if="${#sets.contains(buocTiep, 'PROCESSING')}" type="submit" name="to" value="PROCESSING"
+                class="btn btn-dark btn-block">Bắt đầu chuẩn bị hàng</button>
+        <button th:if="${#sets.contains(buocTiep, 'SHIPPED')}" type="submit" name="to" value="SHIPPED"
+                class="btn btn-dark btn-block">Bàn giao vận chuyển</button>
+        <button th:if="${#sets.contains(buocTiep, 'DELIVERED')}" type="submit" name="to" value="DELIVERED"
+                class="btn btn-dark btn-block">Đã giao tới khách</button>
+        <button th:if="${#sets.contains(buocTiep, 'COMPLETED')}" type="submit" name="to" value="COMPLETED"
+                class="btn btn-dark btn-block">Hoàn tất đơn</button>
+        <button th:if="${#sets.contains(buocTiep, 'CANCELLED')}" type="submit" name="to" value="CANCELLED"
+                class="btn btn-outline btn-block text-red-600">Huỷ đơn</button>
+      </form>
+
+      <p th:if="${#sets.contains(buocTiep, 'DELIVERED')}" class="form-hint">
+        Bấm “Đã giao” sẽ trừ hẳn hàng khỏi kho. Trước đó hàng chỉ đang được giữ chỗ.
+      </p>
+    </div>
+
+    <div th:if="${#sets.isEmpty(buocTiep)}" class="panel p-5">
+      <p class="font-semibold mb-1">Đơn đã kết thúc</p>
+      <p class="text-[13px] text-muted leading-relaxed"
+         th:text="'Trạng thái cuối: ' + ${so.statusLabel} + '. Không còn thao tác nào.'">…</p>
+      <p th:if="${so.cancelReason != null}" class="text-[13px] text-red-600 mt-2"
+         th:text="'Lý do: ' + ${so.cancelReason}">…</p>
+    </div>
+
+    <div class="panel p-5">
+      <p class="font-semibold mb-3">Giao tới</p>
+      <p class="font-medium" th:text="${so.order.receiverName}">…</p>
+      <p class="text-sm text-muted tnum" th:text="${so.order.receiverPhone}">…</p>
+      <p class="text-sm text-muted leading-relaxed mt-1" th:text="${so.order.fullAddress}">…</p>
+      <p th:if="${so.order.note != null}" class="text-[13px] text-muted mt-3 pt-3 border-t border-line-soft"
+         th:text="'Ghi chú của khách: ' + ${so.order.note}">…</p>
+    </div>
+
+    <div class="panel p-5">
+      <p class="font-semibold mb-4">Tiền của đơn này</p>
+      <dl class="space-y-2.5 text-sm">
+        <div class="flex justify-between gap-3">
+          <dt class="text-muted">Tiền hàng</dt>
+          <dd class="tnum" th:text="${#numbers.formatInteger(so.itemsSubtotal, 0, 'POINT')} + '₫'">0₫</dd>
+        </div>
+        <div class="flex justify-between gap-3">
+          <dt class="text-muted">Phí vận chuyển</dt>
+          <dd class="tnum" th:text="${so.shippingFee.signum() == 0}
+                ? 'Miễn phí'
+                : ${#numbers.formatInteger(so.shippingFee, 0, 'POINT')} + '₫'">0₫</dd>
+        </div>
+        <div class="flex justify-between gap-3">
+          <dt class="text-muted">Khách trả</dt>
+          <dd class="tnum font-medium"
+              th:text="${#numbers.formatInteger(so.totalAmount, 0, 'POINT')} + '₫'">0₫</dd>
+        </div>
+        <div class="flex justify-between gap-3 text-red-600">
+          <dt th:text="'Hoa hồng sàn ' + ${so.commissionRate} + '%'">…</dt>
+          <dd class="tnum">−<span th:text="${#numbers.formatInteger(so.commissionAmount, 0, 'POINT')} + '₫'">0₫</span></dd>
+        </div>
+      </dl>
+      <div class="mt-4 pt-4 border-t border-line flex justify-between items-end">
+        <span class="font-semibold">Bạn thực nhận</span>
+        <span class="text-[20px] font-bold tnum tracking-tight"
+              th:text="${#numbers.formatInteger(so.sellerAmount, 0, 'POINT')} + '₫'">0₫</span>
+      </div>
+      <p class="form-hint" th:text="${so.order.paymentMethodLabel} + ' · ' + ${so.order.paymentStatusLabel}">…</p>
+    </div>
+  </aside>
+</div>
+</body>
+</html>

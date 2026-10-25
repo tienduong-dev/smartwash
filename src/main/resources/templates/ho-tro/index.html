@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/app}">
+<head><title>Hỗ trợ</title></head>
+<body>
+<div layout:fragment="content" class="mx-auto max-w-[1280px] px-6 lg:px-10 py-8">
+
+  <div class="max-w-2xl">
+    <p class="text-[12px] font-semibold tracking-wider text-faint uppercase">Hỗ trợ</p>
+    <h1 class="text-[28px] font-bold tracking-[-0.03em] leading-tight mt-2">Câu hỏi thường gặp</h1>
+    <p class="mt-3 text-[15px] text-muted leading-relaxed">
+      Những thắc mắc khách hay hỏi trước khi mua máy giặt trên SmartWash.
+    </p>
+  </div>
+
+  <div class="grid lg:grid-cols-[1fr_340px] gap-10 mt-10 items-start">
+
+    <div class="space-y-3">
+
+      <details class="card p-5" open>
+        <summary class="font-semibold cursor-pointer">Hàng trên SmartWash có chính hãng không?</summary>
+        <p class="mt-3 text-[15px] text-muted leading-relaxed">
+          Mỗi gian hàng chỉ bán đúng một thương hiệu và phải nộp giấy tờ pháp lý
+          cho quản trị viên thẩm định trước khi được mở. Gian hàng gắn nhãn
+          <span class="badge badge-dark">Chính hãng</span> là gian hàng do chính
+          hãng vận hành; <span class="badge badge-neutral">Phân phối uỷ quyền</span>
+          là nhà phân phối được hãng chỉ định. Sản phẩm đăng lên cũng phải qua
+          kiểm duyệt mới hiển thị.
+        </p>
+      </details>
+
+      <details class="card p-5">
+        <summary class="font-semibold cursor-pointer">Mua nhiều gian hàng thì nhận hàng thế nào?</summary>
+        <p class="mt-3 text-[15px] text-muted leading-relaxed">
+          Đơn sẽ tự tách theo từng gian hàng, mỗi gian giao một kiện riêng và
+          tính phí vận chuyển riêng. Bạn trả tiền một lần cho cả đơn, nhưng hàng
+          có thể tới vào những ngày khác nhau. Vào mục
+          <a th:href="@{/orders}" class="link-underline">Đơn hàng của tôi</a>
+          để theo dõi trạng thái từng kiện.
+        </p>
+      </details>
+
+      <details class="card p-5">
+        <summary class="font-semibold cursor-pointer">Phí vận chuyển tính ra sao?</summary>
+        <p class="mt-3 text-[15px] text-muted leading-relaxed">
+          Phí tính theo từng gian hàng. Đơn từ 5.000.000₫ trở lên của cùng một
+          gian hàng được miễn phí giao lắp; dưới mức đó phụ thuộc chính sách của
+          gian hàng, hiển thị rõ ở bước đặt hàng trước khi bạn xác nhận.
+        </p>
+      </details>
+
+      <details class="card p-5">
+        <summary class="font-semibold cursor-pointer">Bảo hành bao lâu, ai bảo hành?</summary>
+        <p class="mt-3 text-[15px] text-muted leading-relaxed">
+          Theo phiếu bảo hành của nhà sản xuất, thường 24 tháng với động cơ
+          inverter. Số tháng cụ thể ghi ngay trên trang từng sản phẩm và được
+          lưu lại trong đơn hàng, nên sau này tra lại vẫn đúng với lúc mua.
+          Trung tâm bảo hành của hãng là nơi tiếp nhận.
+        </p>
+      </details>
+
+      <details class="card p-5">
+        <summary class="font-semibold cursor-pointer">Máy lỗi thì đổi trả thế nào?</summary>
+        <p class="mt-3 text-[15px] text-muted leading-relaxed">
+          Đổi trả trong 7 ngày nếu sản phẩm lỗi do nhà sản xuất và còn nguyên
+          tem niêm phong. Giữ lại hộp và phụ kiện giúp quá trình nhanh hơn.
+          Mỗi gian hàng có thể có chính sách rộng hơn mức này — xem phần chính
+          sách ở cuối trang sản phẩm.
+        </p>
+      </details>
+
+      <details class="card p-5">
+        <summary class="font-semibold cursor-pointer">Huỷ đơn được không?</summary>
+        <p class="mt-3 text-[15px] text-muted leading-relaxed">
+          Được, khi gian hàng chưa xác nhận. Mở đơn trong
+          <a th:href="@{/orders}" class="link-underline">Đơn hàng của tôi</a>
+          rồi bấm Huỷ đơn hàng. Khi gian hàng đã bắt đầu đóng gói thì phải liên
+          hệ trực tiếp gian hàng để yêu cầu huỷ — thông tin liên hệ nằm ở trang
+          sản phẩm.
+        </p>
+      </details>
+
+      <details class="card p-5">
+        <summary class="font-semibold cursor-pointer">Tôi muốn mở gian hàng bán máy giặt</summary>
+        <p class="mt-3 text-[15px] text-muted leading-relaxed">
+          Bạn cần có doanh nghiệp với mã số thuế hợp lệ và giấy tờ chứng minh
+          quyền phân phối thương hiệu. Nộp hồ sơ ở mục
+          <a th:href="@{/seller/register}" class="link-underline">Bán hàng cùng SmartWash</a>,
+          quản trị viên sẽ thẩm định rồi phản hồi.
+        </p>
+      </details>
+    </div>
+
+    <aside class="space-y-5 lg:sticky lg:top-24">
+      <div class="panel p-5">
+        <p class="font-semibold mb-3">Chưa tìm thấy câu trả lời?</p>
+        <p class="text-sm text-muted leading-relaxed">
+          Với thắc mắc về một đơn cụ thể, liên hệ thẳng gian hàng bán sản phẩm
+          đó — số điện thoại và email nằm ở cột phải trang sản phẩm.
+        </p>
+      </div>
+
+      <div class="panel p-5">
+        <p class="font-semibold mb-3">Lối tắt</p>
+        <ul class="space-y-2 text-sm">
+          <li><a th:href="@{/orders}" class="link-underline">Đơn hàng của tôi</a></li>
+          <li><a th:href="@{/products}" class="link-underline">Tất cả sản phẩm</a></li>
+          <li><a th:href="@{/stores}" class="link-underline">Danh sách gian hàng</a></li>
+          <li><a th:href="@{/seller/register}" class="link-underline">Mở gian hàng</a></li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</div>
+</body>
+</html>
