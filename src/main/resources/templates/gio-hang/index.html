@@ -125,18 +125,19 @@
                 th:text="${#numbers.formatInteger(gio.subtotal, 0, 'POINT')} + '₫'">0₫</span>
         </div>
 
-        <!-- Trang /checkout thuộc lát tiếp theo. Nút để dạng vô hiệu hoá thay vì
-             trỏ vào đường dẫn chưa có controller — không bao giờ dẫn khách tới 404. -->
-        <button type="button" class="btn btn-dark btn-lg btn-block mt-5" disabled>
-          Tiến hành đặt hàng
-        </button>
+        <a th:if="${!gio.hasBlockedItem()}" th:href="@{/checkout}"
+           class="btn btn-dark btn-lg btn-block mt-5">Tiến hành đặt hàng</a>
+
+        <!-- Còn dòng vướng thì chặn ngay tại đây, đừng để khách điền hết địa
+             chỉ rồi mới báo lỗi ở bước cuối. -->
+        <button th:if="${gio.hasBlockedItem()}" type="button"
+                class="btn btn-dark btn-lg btn-block mt-5" disabled>Tiến hành đặt hàng</button>
         <p th:if="${gio.hasBlockedItem()}" class="form-hint text-red-600">
           Xử lý các sản phẩm không mua được ở trên trước đã.
         </p>
 
         <p class="form-hint">
-          Trang đặt hàng đang được hoàn thiện. Đơn sẽ tách theo từng gian hàng,
-          mỗi gian giao một kiện riêng.
+          Phí vận chuyển tính riêng cho từng gian hàng, vì mỗi gian giao một kiện.
         </p>
 
         <a th:href="@{/products}" class="btn btn-outline btn-block mt-3">Mua thêm</a>

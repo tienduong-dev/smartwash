@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/app}">
+<head><title>Đặt hàng</title></head>
+<body>
+<div layout:fragment="content" class="mx-auto max-w-[1280px] px-6 lg:px-10 py-8">
+
+  <h1 class="text-[22px] font-bold tracking-[-0.025em]">Đặt hàng</h1>
+  <p class="mt-1 text-sm text-muted tnum" th:text="${gio.totalQuantity} + ' sản phẩm'">…</p>
+
+  <form th:action="@{/checkout}" method="post"
+        class="grid lg:grid-cols-[1fr_360px] gap-8 mt-8 items-start">
+
+    <div class="space-y-6">
+
+      <!-- ========================= ĐỊA CHỈ NHẬN ========================= -->
+      <section class="card p-5">
+        <p class="font-semibold mb-4">Địa chỉ nhận hàng</p>
+
+        <div th:if="${#lists.isEmpty(diaChi)}" class="alert alert-warning">
+          <svg th:replace="~{fragments/icons :: info('18')}"></svg>
+          <div class="flex-1">
+            <p>Bạn chưa có địa chỉ nhận hàng nào.</p>
+            <a th:href="@{/addresses}" class="btn btn-outline btn-sm mt-2">Thêm địa chỉ</a>
+          </div>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(diaChi)}" class="space-y-3">
+          <label th:each="dc, s : ${diaChi}"
+                 class="flex gap-3 p-4 rounded-xl border border-line hover:border-ink transition cursor-pointer">
+            <input type="radio" name="addressId" th:value="${dc.id}"
+                   th:checked="${s.index == 0}" class="mt-1 shrink-0">
+            <span class="min-w-0 flex-1">
+              <span class="flex items-center gap-2 flex-wrap">
+                <span class="font-semibold" th:text="${dc.receiverName}">Người nhận</span>
+                <span class="text-muted tnum text-sm" th:text="${dc.phone}">…</span>
+                <span th:if="${dc.isDefault}" class="badge badge-neutral">Mặc định</span>
+              </span>
+              <span class="block text-sm text-muted leading-snug mt-1"
+                    th:text="${dc.fullAddress}">…</span>
+            </span>
+          </label>
+
+          <a th:href="@{/addresses}" class="btn btn-ghost btn-sm">Quản lý địa chỉ</a>
+        </div>
+      </section>
+
+      <!-- ====================== HÀNG THEO GIAN HÀNG ====================== -->
+      <section th:each="n : ${nhom}" class="card overflow-hidden">
+        <div class="flex items-center gap-3 px-5 py-4 border-b border-line-soft">
+          <svg th:replace="~{fragments/icons :: store('17')}"></svg>
+          <span class="font-semibold" th:text="${n.storeName}">Gian hàng</span>
+          <span class="ml-auto text-[13px] text-muted tnum"
+                th:text="${n.totalQuantity} + ' sản phẩm'">…</span>
+        </div>
+
+        <div class="divide-y divide-line-soft">
+          <div th:each="d : ${n.items}" class="p-5 flex gap-4">
+            <span class="tile w-16 h-16 shrink-0 overflow-hidden">
+              <img th:src="${d.product.imageUrl}" th:alt="${d.product.name}"
+                   class="w-full h-full object-contain p-1.5" loading="lazy">
+            </span>
+            <span class="min-w-0 flex-1">
+              <span class="block font-medium leading-snug truncate-2" th:text="${d.product.name}">…</span>
+              <span class="block text-[13px] text-muted tnum mt-0.5"
+                    th:text="'×' + ${d.quantity}">×1</span>
+            </span>
+            <span class="font-semibold tnum shrink-0"
+                  th:text="${#numbers.formatInteger(d.subtotal, 0, 'POINT')} + '₫'">0₫</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================== THANH TOÁN ======================== -->
+      <section class="card p-5">
+        <p class="font-semibold mb-4">Hình thức thanh toán</p>
+        <div class="space-y-3">
+          <label class="flex gap-3 p-4 rounded-xl border border-line hover:border-ink transition cursor-pointer">
+            <input type="radio" name="paymentMethod" value="COD" checked class="mt-1 shrink-0">
+            <span class="min-w-0">
+              <span class="block font-medium">Thanh toán khi nhận hàng</span>
+              <span class="block text-[13px] text-muted mt-0.5">Trả tiền mặt cho nhân viên giao hàng</span>
+            </span>
+          </label>
+
+          <!-- Cổng trực tuyến thuộc phần sau. Để dạng vô hiệu hoá cho khách
+               thấy sẽ có, nhưng không bấm được vào luồng chưa chạy. -->
+          <label class="flex gap-3 p-4 rounded-xl border border-line-soft opacity-50">
+            <input type="radio" name="paymentMethod" value="VNPAY" disabled class="mt-1 shrink-0">
+            <span class="min-w-0">
+              <span class="block font-medium">VNPAY / Ví MoMo</span>
+              <span class="block text-[13px] text-muted mt-0.5">Đang kết nối cổng thanh toán</span>
+            </span>
+          </label>
+        </div>
+
+        <div class="mt-5">
+          <label for="note" class="label">Ghi chú cho người bán</label>
+          <textarea id="note" name="note" rows="2" class="input"
+                    placeholder="Ví dụ: giao giờ hành chính, gọi trước khi tới"></textarea>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============================ TÓM TẮT ============================ -->
+    <aside>
+      <div class="panel p-5 lg:sticky lg:top-24">
+        <p class="font-semibold mb-4">Tóm tắt</p>
+
+        <dl class="space-y-2.5 text-sm">
+          <div class="flex justify-between gap-3">
+            <dt class="text-muted">Tiền hàng</dt>
+            <dd class="tnum font-medium"
+                th:text="${#numbers.formatInteger(gio.subtotal, 0, 'POINT')} + '₫'">0₫</dd>
+          </div>
+          <div class="flex justify-between gap-3">
+            <dt class="text-muted">Phí vận chuyển</dt>
+            <dd class="text-muted text-[13px] text-right">Tính theo từng gian hàng,<br>hiện ở màn hình xác nhận</dd>
+          </div>
+        </dl>
+
+        <div class="mt-4 pt-4 border-t border-line flex justify-between items-end">
+          <span class="font-semibold">Tiền hàng</span>
+          <span class="text-[24px] font-bold tnum tracking-tight"
+                th:text="${#numbers.formatInteger(gio.subtotal, 0, 'POINT')} + '₫'">0₫</span>
+        </div>
+
+        <button type="submit" class="btn btn-dark btn-lg btn-block mt-5"
+                th:disabled="${#lists.isEmpty(diaChi)}">Đặt hàng</button>
+
+        <p class="form-hint">
+          Đơn sẽ tách thành <span class="tnum" th:text="${#lists.size(nhom)}">1</span> đơn con theo
+          từng gian hàng, mỗi gian giao một kiện riêng và tính phí vận chuyển riêng.
+        </p>
+
+        <a th:href="@{/cart}" class="btn btn-outline btn-block mt-3">Quay lại giỏ hàng</a>
+      </div>
+    </aside>
+  </form>
+</div>
+</body>
+</html>
